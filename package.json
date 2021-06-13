@@ -1,0 +1,30 @@
+{
+  "dependencies": {
+    "@vvo/tzdb": "^6.7.0",
+    "axios": "^0.21.1",
+    "tinycolor2": "^1.4.2"
+  },
+  "type": "module",
+  "name": "pk-api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/greysdawn/pk-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/greysdawn/pk-api/issues"
+  },
+  "homepage": "https://github.com/greysdawn/pk-api#readme",
+  "description": ""
+}
