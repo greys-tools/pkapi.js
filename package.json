@@ -2,7 +2,8 @@
   "dependencies": {
     "@vvo/tzdb": "^6.7.0",
     "axios": "^0.21.1",
-    "tinycolor2": "^1.4.2"
+    "tinycolor2": "^1.4.2",
+    "valid-url": "^1.0.9"
   },
   "type": "module",
   "name": "pk-api",

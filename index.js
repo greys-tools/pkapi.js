@@ -7,9 +7,12 @@ import Member from './lib/structures/member.js';
 import ROUTES from './lib/routes.js';
 
 export default class PKAPI {
+	#token;
+
 	constructor(options = {}) {
 		this._base = options.base_url || 'https://api.pluralkit.me';
 		this._version = options.version || 1;
+		this.#token = options.token;
 
 		this.inst = axios.create({
 			validateStatus: (s) => s < 500,
@@ -18,39 +21,49 @@ export default class PKAPI {
 	}
 
 	async getSystem(opts) {
-		if(!opts.id && !opts.token) return Promise.reject('Must provide a token or id');
+		var token = this.#token || opts.token;
+		if(!opts.id && !token) throw new Error('Must provide a token or ID');
 		var sys;
 		var resp;
 		try {
-			if(opts.token) {
-				var start = Date.now();
-				resp = await this.handle("get", ROUTES.GET_SYSTEM(), {
-					headers: { 'Authorization': opts.token }
-				});
-				var end = Date.now();
-				console.log(`Request time: ${end - start}ms`)
+			if(token) {
+				resp = await this.handle("get", ROUTES.GET_SYSTEM(), {token});
 				if(resp.status == 200) sys = new System(this, resp.data);
 				else throw new Error(resp.data);
 			} else {
-				var start = Date.now();
 				if(opts.id.length > 10) resp = await this.handle("get", ROUTES.GET_ACCOUNT(opts.id));
 				else resp = await this.handle("get", ROUTES.GET_SYSTEM(opts.id));
-				var end = Date.now();
-				console.log(`Request time: ${end - start}ms`)
 				if(resp.status == 200) sys = new System(this, resp.data);
 				else throw new Error(resp.data);
 			}
 
 			if(opts.fetch) {
-				if(opts.fetch.includes("members")) await sys.getMembers(opts.token);
-				if(opts.fetch.includes("fronters")) await sys.getFronters(opts.token);
-				if(opts.fetch.includes("switches")) await sys.getSwitches(opts.token);
+				if(opts.fetch.includes("members")) sys.members = await sys.getMembers(token);
+				if(opts.fetch.includes("fronters")) sys.fronters = await sys.getFronters(token);
+				if(opts.fetch.includes("switches")) sys.switches = await sys.getSwitches(token, opts.raw);
 			}
 		} catch(e) {
-			throw new Error(e)
+			throw new Error(e.message || e)
 		}
 
 		return sys;
+	}
+
+	async getAccount(opts) {
+		return await this.getSystem(opts);
+	}
+
+	async getMember(opts) {
+		if(!opts.id) throw new Error('Must provide an ID');
+		var token = this.#token || opts.token;
+		try {
+			var resp = await this.handle("get", ROUTES.GET_MEMBER(this.id), {token});
+			if(resp) var mem = new Member(this, resp.data);
+		} catch(e) {
+			throw new Error(e.message || e);
+		}
+
+		return mem;
 	}
 
 	set base_url(s) {
@@ -71,14 +84,23 @@ export default class PKAPI {
 		return this._version;
 	}
 
+	set token(t) {
+		this.#token = token;
+	}
+
+	get token() {
+		return this.#token;
+	}
+
 	async handle(method, path, options = {}) {
 		var headers = options.headers || {};
 		var request = {method, headers};
-		if(options.token) request.headers["Authorization"] = options.token;
+		var token = this.#token || options.token;
+		if(token) request.headers["Authorization"] = token;
 
 		if(options.body) {
 			request.headers["content-type"] = "application/json";
-	        request.data = JSON.stringify(req.body);
+	        request.data = JSON.stringify(options.body);
 		}
 
 		try {
