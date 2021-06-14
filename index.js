@@ -265,7 +265,7 @@ export default class PKAPI {
 	}
 
 	set token(t) {
-		this.#token = token;
+		this.#token = t;
 	}
 
 	get token() {
