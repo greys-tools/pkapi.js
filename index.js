@@ -2,25 +2,33 @@ import axios from 'axios';
 
 import System from './lib/structures/system.js';
 import Member from './lib/structures/member.js';
-// import Switch from './lib/structures/switch';
+import Switch from './lib/structures/switch.js';
+import Message from './lib/structures/message.js';
 
 import ROUTES from './lib/routes.js';
 
 export default class PKAPI {
 	#token;
+	#inst;
+	#_base;
+	#_version;
+	
+	constructor(opts = {}) {
+		this.#_base = opts.base_url || 'https://api.pluralkit.me';
+		this.#_version = opts.version || 1;
+		this.#token = opts.token;
 
-	constructor(options = {}) {
-		this._base = options.base_url || 'https://api.pluralkit.me';
-		this._version = options.version || 1;
-		this.#token = options.token;
-
-		this.inst = axios.create({
-			validateStatus: (s) => s < 500,
-			baseURL: `${this._base}/v${this._version}`
+		this.#inst = axios.create({
+			validateStatus: (s) => s < 300 && s > 100,
+			baseURL: `${this.#_base}/v${this.#_version}`
 		})
 	}
 
-	async getSystem(opts) {
+	/*
+	**			SYSTEM FUNCTIONS
+	*/
+	
+	async getSystem(opts = {}) {
 		var token = this.#token || opts.token;
 		if(!opts.id && !token) throw new Error('Must provide a token or ID');
 		var sys;
@@ -43,54 +51,180 @@ export default class PKAPI {
 				if(opts.fetch.includes("switches")) sys.switches = await sys.getSwitches(token, opts.raw);
 			}
 		} catch(e) {
-			throw new Error(e.message || e)
+			throw new Error(resp.data || e);
 		}
 
 		return sys;
 	}
 
-	async getAccount(opts) {
+	async getAccount(opts = {}) {
 		return await this.getSystem(opts);
 	}
 
-	async getMember(opts) {
-		if(!opts.id) throw new Error('Must provide an ID');
-		var token = this.#token || opts.token;
+	async patchSystem(data = {}) {
+		var token = this.#token || data.token;
+		if(!token) throw new Error("PATCH requires token");
+
 		try {
-			var resp = await this.handle("get", ROUTES.GET_MEMBER(this.id), {token});
-			if(resp) var mem = new Member(this, resp.data);
+			var sys = data instanceof System ? data : new System(this, data);
+			var body = await sys.verify();
+			sys = await this.handle("patch", ROUTES.PATCH_SYSTEM(), {token, body});
 		} catch(e) {
-			throw new Error(e.message || e);
+			throw new Error(e || resp.data)
 		}
 
-		return mem;
+		return new System(this, sys.data);
 	}
 
-	set base_url(s) {
-		this._base = s;
-		this.inst.defaults.baseURL = `${this._base}/v${this._version}`;
+	/*
+	**			MEMBER FUNCTIONS
+	*/
+
+	async createMember(data = {}) {
+		var token = this.#token || data.token;
+		if(!token) throw new Error("POST requires token");
+
+		try {
+			var mem = new Member(this, data);
+			var body = await mem.verify();
+			mem = await this.handle("post", ROUTES.ADD_MEMBER(), {token, body});
+		} catch(e) {
+			throw new Error(e || resp.data)
+		}
+
+		return new Member(this, mem.data);
 	}
 
-	get base_url() {
-		return this._base;
+	async getMember(opts = {}) {
+		if(!opts.id) throw new Error('Must provide a member ID');
+		var token = this.#token || opts.token;
+		try {
+			var resp = await this.handle("get", ROUTES.GET_MEMBER(opts.id), {token});
+		} catch(e) {
+			throw new Error(e || resp.data);
+		}
+
+		return new Member(this, resp.data);
 	}
 
-	set version(n) {
-		this._version = n;
-		this.inst.defaults.baseURL = `${this._base}/v${this._version}`;
+	async getMembers(opts = {}) {
+		if(!opts.id) throw new Error('Must provide a system ID');
+		var token = this.#token || opts.token;
+		try {
+			var resp = await this.handle("get", ROUTES.GET_MEMBERS(opts.id), {token});
+		} catch(e) {
+			throw new Error(e || resp.data);
+		}
+
+		var mems = resp.data.map(m => [m.id, new Member(this, m)]);
+		return new Map(mems);
 	}
 
-	get version() {
-		return this._version;
+	async patchMember(data = {}) {
+		if(!data.id) throw new Error("Must provide a member ID");
+		var token = this.#token || data.token;
+		if(!token) throw new Error("PATCH requires token");
+
+		try {
+			var mem = data instanceof Member ? data : new Member(this, data);
+			var body = await mem.verify();
+			mem = await this.handle("patch", ROUTES.PATCH_MEMBER(data.id), {token, body});
+		} catch(e) {
+			throw new Error(e || resp.data)
+		}
+
+		return new Member(this, mem.data);
 	}
 
-	set token(t) {
-		this.#token = token;
+	async deleteMember(opts = {}) {
+		if(!opts.id) throw new Error('Must provide a member ID');
+		var token = this.#token || opts.token;
+		if(!token) throw new Error("DELETE requires token");
+		try {
+			var resp = await this.handle("get", ROUTES.DELETE_MEMBER(opts.id), {token});
+		} catch(e) {
+			throw new Error(resp.data || e);
+		}
+
+		return null;
 	}
 
-	get token() {
-		return this.#token;
+	/*
+	**			SWITCH FUNCTIONS
+	*/
+
+	async createSwitch(opts = {}) {
+		var token = this.#token || opts.token;
+		if(!token) throw new Error("POST requires tokwn");
+
+		var body = {members: []};
+		if(opts.members) {
+			for(var m of opts.members) {
+				if(m.id) body.members.push(m.id)
+				else body.members.push(m)
+			}
+		}
+		try {
+			var resp = await this.handle("post", ROUTES.ADD_SWITCH(), {token, body})
+		} catch(e) {
+			throw new Error(resp.data || e)
+		}
+
+		return;
 	}
+
+	async getSwitches(opts = {}) {
+		if(!opts.id) throw new Error('Must provide a system ID');
+		var token = this.#token || opts.token;
+		try {
+			var resp = await this.handle("get", ROUTES.GET_SWITCHES(opts.id), {token});
+			if(!opts.raw) var membs = await this.handle("get", ROUTES.GET_MEMBERS(opts.id), {token})
+		} catch(e) {
+			throw new Error(resp.data || e);
+		}
+
+		if(!opts.raw) {
+			membs = new Map(membs.data.map(m => [m.id, new Member(this, m)]));
+			var switches = [];
+			for(var s of resp.data) {
+				s.members = new Map(s.members.map(m => [m, membs.get(m)]));
+				switches.push(new Switch(this, s))
+			}
+			return switches;
+		} else return resp.data.map(s => new Switch(this, s));
+	}
+
+	async getFronters(opts = {}) {
+		if(!opts.id) throw new Error('Must provide a system ID');
+		var token = this.#token || opts.token;
+		try {
+			var resp = await this.handle("get", ROUTES.GET_FRONTERS(opts.id), {token});
+		} catch(e) {
+			throw new Error(resp.data || e);
+		}
+
+		return new Switch(this, resp.data);
+	}
+
+	/*
+	** 			MISC FUNCTIONS
+	*/
+
+	async getMessage(opts = {}) {
+		if(!opts.id) throw new Error("Must provide a message id");
+		var token = this.#token || opts.token;
+		try {
+			var resp = await this.handle("get", ROUTES.GET_MESSAGE(opts.id), {token});
+		} catch(e) {
+			throw new Error(resp.data || e);
+		}
+
+		return new Message(this, resp.data);
+	}
+
+	/*
+	**			BASE STUFF
+	*/
 
 	async handle(method, path, options = {}) {
 		var headers = options.headers || {};
@@ -104,11 +238,37 @@ export default class PKAPI {
 		}
 
 		try {
-			var resp = await this.inst(path, request);
+			var resp = await this.#inst(path, request);
 		} catch(e) {
 			resp = {error: e.message};
 		}
 
 		return resp;
+	}
+	
+	set base_url(s) {
+		this.#_base = s;
+		this.#inst.defaults.baseURL = `${this._base}/v${this._version}`;
+	}
+
+	get base_url() {
+		return this.#_base;
+	}
+
+	set version(n) {
+		this.#_version = n;
+		this.#inst.defaults.baseURL = `${this._base}/v${this._version}`;
+	}
+
+	get version() {
+		return this.#_version;
+	}
+
+	set token(t) {
+		this.#token = token;
+	}
+
+	get token() {
+		return this.#token;
 	}
 }
