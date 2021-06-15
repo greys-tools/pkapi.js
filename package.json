@@ -20,7 +20,12 @@
     "type": "git",
     "url": "git+https://github.com/greysdawn/pk-api.git"
   },
-  "keywords": ["pluralkit", "plural", "pk", "api"],
+  "keywords": [
+    "pluralkit",
+    "plural",
+    "pk",
+    "api"
+  ],
   "author": "greysdawn <greysdawn@gmail.com> (https://greysdawn.com)",
   "license": "ISC",
   "bugs": {
