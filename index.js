@@ -187,8 +187,9 @@ export default class PKAPI {
 			membs = new Map(membs.data.map(m => [m.id, new Member(this, m)]));
 			var switches = [];
 			for(var s of resp.data) {
-				s.members = new Map();
-				for(var m of s.members) if(membs.get(m)) s.members.set(m, membs.get(m));
+				var members = new Map();
+				for(var m of s.members) if(membs.get(m)) members.set(m, membs.get(m));
+				s.members = members;
 				switches.push(new Switch(this, s))
 			}
 			return switches;
