@@ -7,7 +7,7 @@
     "valid-url": "^1.0.9"
   },
   "type": "module",
-  "name": "pk.js",
+  "name": "@greysdawn/pk.js",
   "version": "1.0.0",
   "main": "index.js",
   "directories": {
