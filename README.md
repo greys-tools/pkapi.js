@@ -17,7 +17,7 @@ And more!
 
 ## Installation
 With **Node 14.x or higher**, use this to install:  
-`npm install pk.js`
+`npm install pkapi.js`
 
 ## Dependencies
 This library uses only a few dependencies, which are:
@@ -31,7 +31,7 @@ This library uses only a few dependencies, which are:
 The wrapper itself requires **zero setup.** However, there are still some options you can use:
 
 ```js
-import PKAPI from 'pk.js';
+import PKAPI from 'pkapi.js';
 
 // shown values are defaults!
 const api = new PKAPI({
