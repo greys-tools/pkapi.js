@@ -1,13 +1,13 @@
-import axios from 'axios';
+const axios = require('axios');
 
-import System from './lib/structures/system.js';
-import Member from './lib/structures/member.js';
-import Switch from './lib/structures/switch.js';
-import Message from './lib/structures/message.js';
+const System = require('./lib/structures/system.js');
+const Member = require('./lib/structures/member.js');
+const Switch = require('./lib/structures/switch.js');
+const Message = require('./lib/structures/message.js');
 
-import ROUTES from './lib/routes.js';
+const ROUTES = require('./lib/routes.js');
 
-export default class PKAPI {
+class PKAPI {
 	#token;
 	#inst;
 	#_base;
@@ -274,3 +274,5 @@ export default class PKAPI {
 		return this.#token;
 	}
 }
+
+module.exports = PKAPI;
