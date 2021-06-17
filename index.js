@@ -141,7 +141,7 @@ class PKAPI {
 		var token = this.#token || opts.token;
 		if(!token) throw new Error("DELETE requires token");
 		try {
-			var resp = await this.handle("get", ROUTES.DELETE_MEMBER(opts.id), {token});
+			var resp = await this.handle("delete", ROUTES.DELETE_MEMBER(opts.id), {token});
 		} catch(e) {
 			throw new Error(resp.data || e);
 		}
