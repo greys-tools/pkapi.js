@@ -54,7 +54,7 @@ var system = await api.getSystem({id: 'exmpl'});
 var system = await api.getSystem({id: 'exmpl', token: process.env.TOKEN});
 
 // edit the system
-system.timezone = "est";
+system.tz = "est";
 system.description = "Test system";
 
 // patch
