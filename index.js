@@ -1,11 +1,12 @@
 const axios = require('axios');
 
-const System = require('./lib/structures/system.js');
-const Member = require('./lib/structures/member.js');
-const Switch = require('./lib/structures/switch.js');
-const Message = require('./lib/structures/message.js');
+const System = require('./lib/structures/system');
+const Member = require('./lib/structures/member');
+const Switch = require('./lib/structures/switch');
+const Message = require('./lib/structures/message');
+const PKError = require('./lib/structures/pkerror');
 
-const ROUTES = require('./lib/routes.js');
+const ROUTES = require('./lib/routes');
 
 class PKAPI {
 	#token;
@@ -35,12 +36,12 @@ class PKAPI {
 		var resp;
 		try {
 			if(token) {
-				resp = await this.handle("get", ROUTES.GET_SYSTEM(), {token});
+				resp = await this.handle("get", ROUTES[this.#_version].GET_OWN_SYSTEM(), {token});
 				if(resp.status == 200) sys = new System(this, resp.data);
 				else throw new Error(resp.data);
 			} else {
-				if(opts.id.length > 10) resp = await this.handle("get", ROUTES.GET_ACCOUNT(opts.id));
-				else resp = await this.handle("get", ROUTES.GET_SYSTEM(opts.id));
+				if(opts.id.length > 10) resp = await this.handle("get", ROUTES[this.#_version].GET_ACCOUNT(opts.id));
+				else resp = await this.handle("get", ROUTES[this.#_version].GET_SYSTEM(opts.id));
 				if(resp.status == 200) sys = new System(this, resp.data);
 				else throw new Error(resp.data);
 			}
@@ -51,7 +52,7 @@ class PKAPI {
 				if(opts.fetch.includes("switches")) sys.switches = await sys.getSwitches(token, opts.raw);
 			}
 		} catch(e) {
-			throw new Error(resp.data || e);
+			throw new Error(e);
 		}
 
 		return sys;
@@ -68,7 +69,7 @@ class PKAPI {
 		try {
 			var sys = data instanceof System ? data : new System(this, data);
 			var body = await sys.verify();
-			sys = await this.handle("patch", ROUTES.PATCH_SYSTEM(), {token, body});
+			sys = await this.handle("patch", ROUTES[this.#_version].PATCH_SYSTEM(), {token, body});
 		} catch(e) {
 			throw new Error(e || resp.data)
 		}
@@ -87,7 +88,7 @@ class PKAPI {
 		try {
 			var mem = new Member(this, data);
 			var body = await mem.verify();
-			mem = await this.handle("post", ROUTES.ADD_MEMBER(), {token, body});
+			mem = await this.handle("post", ROUTES[this.#_version].ADD_MEMBER(), {token, body});
 		} catch(e) {
 			throw new Error(e || resp.data)
 		}
@@ -99,7 +100,7 @@ class PKAPI {
 		if(!opts.id) throw new Error('Must provide a member ID');
 		var token = this.#token || opts.token;
 		try {
-			var resp = await this.handle("get", ROUTES.GET_MEMBER(opts.id), {token});
+			var resp = await this.handle("get", ROUTES[this.#_version].GET_MEMBER(opts.id), {token});
 		} catch(e) {
 			throw new Error(e || resp.data);
 		}
@@ -111,7 +112,7 @@ class PKAPI {
 		if(!opts.id) throw new Error('Must provide a system ID');
 		var token = this.#token || opts.token;
 		try {
-			var resp = await this.handle("get", ROUTES.GET_MEMBERS(opts.id), {token});
+			var resp = await this.handle("get", ROUTES[this.#_version].GET_MEMBERS(opts.id), {token});
 		} catch(e) {
 			throw new Error(e || resp.data);
 		}
@@ -128,7 +129,7 @@ class PKAPI {
 		try {
 			var mem = data instanceof Member ? data : new Member(this, data);
 			var body = await mem.verify();
-			mem = await this.handle("patch", ROUTES.PATCH_MEMBER(data.id), {token, body});
+			mem = await this.handle("patch", ROUTES[this.#_version].PATCH_MEMBER(data.id), {token, body});
 		} catch(e) {
 			throw new Error(e || resp.data)
 		}
@@ -141,9 +142,9 @@ class PKAPI {
 		var token = this.#token || opts.token;
 		if(!token) throw new Error("DELETE requires token");
 		try {
-			var resp = await this.handle("delete", ROUTES.DELETE_MEMBER(opts.id), {token});
+			var resp = await this.handle("delete", ROUTES[this.#_version].DELETE_MEMBER(opts.id), {token});
 		} catch(e) {
-			throw new Error(resp.data || e);
+			throw new Error(e);
 		}
 
 		return null;
@@ -165,9 +166,9 @@ class PKAPI {
 			}
 		}
 		try {
-			var resp = await this.handle("post", ROUTES.ADD_SWITCH(), {token, body})
+			var resp = await this.handle("post", ROUTES[this.#_version].ADD_SWITCH(), {token, body})
 		} catch(e) {
-			throw new Error(resp.data || e)
+			throw new Error(e)
 		}
 
 		return;
@@ -177,10 +178,10 @@ class PKAPI {
 		if(!opts.id) throw new Error('Must provide a system ID');
 		var token = this.#token || opts.token;
 		try {
-			var resp = await this.handle("get", ROUTES.GET_SWITCHES(opts.id), {token});
-			if(!opts.raw) var membs = await this.handle("get", ROUTES.GET_MEMBERS(opts.id), {token})
+			var resp = await this.handle("get", ROUTES[this.#_version].GET_SWITCHES(opts.id), {token});
+			if(!opts.raw) var membs = await this.handle("get", ROUTES[this.#_version].GET_MEMBERS(opts.id), {token})
 		} catch(e) {
-			throw new Error(resp.data || e);
+			throw new Error(e);
 		}
 
 		if(!opts.raw) {
@@ -200,9 +201,9 @@ class PKAPI {
 		if(!opts.id) throw new Error('Must provide a system ID');
 		var token = this.#token || opts.token;
 		try {
-			var resp = await this.handle("get", ROUTES.GET_FRONTERS(opts.id), {token});
+			var resp = await this.handle("get", ROUTES[this.#_version].GET_FRONTERS(opts.id), {token});
 		} catch(e) {
-			throw new Error(resp.data || e);
+			throw new Error(e);
 		}
 
 		return new Switch(this, resp.data);
@@ -213,12 +214,16 @@ class PKAPI {
 	*/
 
 	async getMessage(opts = {}) {
-		if(!opts.id) throw new Error("Must provide a message id");
+		if(!opts.id) throw new PKError(this, {
+			status: 400,
+			message: "Must provide a message ID.",
+			statusText: 'Bad request.'
+		});
 		var token = this.#token || opts.token;
 		try {
-			var resp = await this.handle("get", ROUTES.GET_MESSAGE(opts.id), {token});
+			var resp = await this.handle("get", ROUTES[this.#_version].GET_MESSAGE(opts.id), {token});
 		} catch(e) {
-			throw new Error(resp.data || e);
+			throw e;
 		}
 
 		return new Message(this, resp.data);
@@ -242,7 +247,7 @@ class PKAPI {
 		try {
 			var resp = await this.#inst(path, request);
 		} catch(e) {
-			resp = {error: e.message};
+			throw new PKError(this, e.response);
 		}
 
 		return resp;
