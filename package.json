@@ -31,5 +31,8 @@
     "url": "https://github.com/greysdawn/pk.js/issues"
   },
   "homepage": "https://github.com/greysdawn/pk.js#readme",
-  "description": "A JS wrapper for the PluralKit Discord bot's API."
+  "description": "A JS wrapper for the PluralKit Discord bot's API.",
+  "devDependencies": {
+    "node-fetch": "^3.0.0"
+  }
 }
