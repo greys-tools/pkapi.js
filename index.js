@@ -35,7 +35,7 @@ class PKAPI {
 	
 	async getSystem(data = {}) {
 		var token = this.#token || data.token;
-		if((data.system == null) && !token) throw new Error('Must provide a token or ID.');
+		if(data.system == null && !token) throw new Error('Must provide a token or ID.');
 		var sys;
 		var resp;
 		try {
@@ -504,10 +504,8 @@ class PKAPI {
 
 		var body = {members: []};
 		if(data.members) {
-			for(var m of data.members) {
-				if(m.id) body.members.push(m.id)
-				else body.members.push(m)
-			}
+			for(var m of data.members)
+				body.members.push(m.id ?? m);
 		}
 		try {
 			var resp = await this.handle(ROUTES[this.#_version].ADD_SWITCH(), {token, body})
