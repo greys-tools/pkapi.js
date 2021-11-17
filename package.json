@@ -7,11 +7,8 @@
     "valid-url": "^1.0.9"
   },
   "name": "pkapi.js",
-  "version": "2.0.1",
+  "version": "2.0.0",
   "main": "index.js",
-  "publishConfig": {
-    "registry":"https://npm.pkg.github.com"
-  },
   "directories": {
     "lib": "lib"
   },
@@ -20,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/greysdawn/pk.js.git"
+    "url": "git://github.com/greysdawn/pk.js.git"
   },
   "keywords": [
     "pluralkit",
@@ -34,8 +31,5 @@
     "url": "https://github.com/greysdawn/pk.js/issues"
   },
   "homepage": "https://github.com/greysdawn/pk.js#readme",
-  "description": "A JS wrapper for the PluralKit Discord bot's API.",
-  "devDependencies": {
-    "node-fetch": "^3.0.0"
-  }
+  "description": "A JS wrapper for the PluralKit Discord bot's API."
 }
