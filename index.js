@@ -390,7 +390,7 @@ class PKAPI {
 			throw e;
 		}
 
-		return new Group(this, mem.data);
+		return new Group(this, group.data);
 	}
 
 	async deleteGroup(data = {}) {
@@ -588,7 +588,7 @@ class PKAPI {
 		var token = this.#token || data.token;
 		if(!token) throw new Error('PATCH requires a token.');
 		if(!data.switch) throw new Error('Must provide a switch ID.');
-		if(!data.timestamp) throw new Error('Must provide a timestmap.');
+		if(!data.timestamp) throw new Error('Must provide a timestamp.');
 
 		try {
 			var sw = await this.handle(ROUTES[this.#_version].PATCH_SWITCH(data.switch), {
@@ -683,6 +683,7 @@ class PKAPI {
 		try {
 			var resp = await this.#inst(route, request);
 		} catch(e) {
+			console.log(e)
 			throw new APIError(this, e.response);
 		}
 
