@@ -8,7 +8,7 @@ comes with an API for use alongside the bot.
 This wrapper was created to make interacting with the API in Node.js applications easier
 
 This wrapper comes with features like:
-- Full coverage of the API (up to v1)
+- Full coverage of the API (up to v2)
 - More options for setting values (eg: "red" is a valid `member.color`)
 - Options to fetch members, fronters, and switches when fetching a system
 - Promise based and object oriented
@@ -36,22 +36,21 @@ import PKAPI from 'pkapi.js';
 // shown values are defaults!
 const api = new PKAPI({
 	base_url: "https://api.pluralkit.me", // base api url
-	version: 1, // api version
+	version: 2, // api version
 	token: undefined // for authing requests. only set if you're using this for a single system!
 })
 ```
 
-**Note:** This library currently only supports APIv1. 
-As of writing (06.14.2021), APIv2 is not yet released
+**Note:** This library currently supports up to APIv2.
 
 ## Examples
 *Using the above setup; note that `exmpl` is a **real** system*
 ```js
 // get a system by id
-var system = await api.getSystem({id: 'exmpl'});
+var system = await api.getSystem({system: 'exmpl'});
 
 // authed version of above
-var system = await api.getSystem({id: 'exmpl', token: process.env.TOKEN});
+var system = await api.getSystem({system: 'exmpl', token: process.env.TOKEN});
 
 // edit the system
 system.tz = "est";
@@ -66,7 +65,7 @@ console.log(system)
 
 ```js
 // get member
-var member = await api.getMember{id: 'gaznz'};
+var member = await api.getMember({member: 'gaznz'};
 
 // edit
 member.name = "Test Name";
