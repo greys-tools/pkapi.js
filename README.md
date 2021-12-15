@@ -31,7 +31,7 @@ This library uses only a few dependencies, which are:
 The wrapper itself requires **zero setup.** However, there are still some options you can use:
 
 ```js
-import PKAPI from 'pkapi.js';
+const PKAPI = require('pkapi.js');
 
 // shown values are defaults!
 const api = new PKAPI({
