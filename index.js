@@ -18,6 +18,8 @@ class PKAPI {
 	#inst;
 	#_base;
 	#_version;
+
+	#version_warning = false;
 	
 	constructor(data = {}) {
 		this.#_base = data.base_url || 'https://api.pluralkit.me';
@@ -54,6 +56,7 @@ class PKAPI {
 				if(data.fetch.includes("fronters")) sys.fronters = await sys.getFronters(token);
 				if(data.fetch.includes("switches")) sys.switches = await sys.getSwitches(token, data.raw);
 				if(data.fetch.includes("groups")) sys.groups = await sys.getGroups(token);
+				if(data.fetch.includes("settings")) sys.config = await sys.getSettings(token);
 			}
 		} catch(e) {
 			throw e;
@@ -714,6 +717,15 @@ class PKAPI {
 	        request.data = JSON.stringify(options.body);
 		}
 
+		if(this.version == 1 && !this.#version_warning) {
+			console.warn(
+				'WARNING: API version 1 is considered officially deprecated. ' +
+				'Support for this API version may be removed from this wrapper ' +
+				'in a future version.'
+			);
+			this.#version_warning = true;
+		}
+			
 		try {
 			var resp = await this.#inst(route, request);
 		} catch(e) {
