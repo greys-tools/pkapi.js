@@ -5,6 +5,7 @@ const Member 				= require('./lib/structures/member');
 const Group 				= require('./lib/structures/group');
 const Switch 				= require('./lib/structures/switch');
 const Message 				= require('./lib/structures/message');
+const SystemSettings 		= require('./lib/structures/systemSettings');
 const SystemGuildSettings 	= require('./lib/structures/systemGuildSettings');
 const MemberGuildSettings 	= require('./lib/structures/memberGuildSettings');
 
@@ -78,6 +79,41 @@ class PKAPI {
 		}
 
 		return new System(this, sys.data);
+	}
+
+	async getSystemSettings(data = {}) {
+		if(this.version < 2) throw new Error("System settings are only available for API version 2.");
+
+		var token = this.#token || data.token;
+		if(!token) throw new Error("Getting system settings requires a token.");
+
+		try {
+			var resp = await this.handle(ROUTES[this.#_version].GET_SYSTEM_SETTINGS(), {token});
+		} catch(e) {
+			throw e;
+		}
+
+		return new SystemSettings(this, resp.data);
+	}
+
+	async patchSystemSettings(data = {}) {
+		if(this.version < 2) throw new Error("System settings are only available for API version 2.");
+
+		var token = this.#token || data.token;
+		if(!token) throw new Error("PATCH requires a token.");
+
+		try {
+			var settings = data instanceof SystemSettings ? data : new SystemSettings(this, data);
+			var body = await settings.verify();
+			settings = await this.handle(
+				ROUTES[this.#_version].PATCH_SYSTEM_SETTINGS(),
+				{token, body}
+			);
+		} catch(e) {
+			throw e;
+		}
+
+		return new SystemSettings(this, settings.data);
 	}
 
 	async getSystemGuildSettings(data = {}) {
