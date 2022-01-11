@@ -721,7 +721,8 @@ class PKAPI {
 			console.warn(
 				'WARNING: API version 1 is considered officially deprecated. ' +
 				'Support for this API version may be removed from this wrapper ' +
-				'in a future version.'
+				'in a future version. Some methods may not fully work for v1 as well. '+
+				'USE v1 at your own risk!'
 			);
 			this.#version_warning = true;
 		}
