@@ -1,4 +1,4 @@
-# PluralKit.js
+# pkapi.js
 *A PluralKit API wrapper for JavaScript*
 
 ## About
