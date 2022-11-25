@@ -1,4 +1,4 @@
-export function validatePrivacy(keys, obj) {
+export function validatePrivacy(keys: Array<string>, obj: any) {
 	var priv = {}
 	for(var k of keys) {
 		if(obj[k] == null) continue;
@@ -10,7 +10,7 @@ export function validatePrivacy(keys, obj) {
 	return priv;
 }
 
-export function formatDate(d) {
+export function formatDate(d: Date) {
 	var y = ('000' + d.getFullYear()).slice(-4);
 	var m = ("0" + (d.getMonth() + 1)).slice(-2);
 	var d = ("0" + (d.getDate())).slice(-2);

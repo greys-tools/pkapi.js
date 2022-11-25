@@ -1,5 +1,5 @@
-import Member from "./member.js";
-import System from "./system.js";
+import Member from "./member";
+import System from "./system";
 
 const KEYS = {
 	timestamp: {
@@ -16,11 +16,18 @@ const KEYS = {
 		init: (m, api) => m ? new Member(api, m) : null
 	}
 }
-
 export default class Message {
 	#api;
+
+	timestamp: Date | string;
+	id: string;
+	original?: string;
+	sender: string;
+	channel: string;
+	system?: string | System;
+	member?: string | Member;
 	
-	constructor(api, data) {
+	constructor(api, data: Partial<Message>) {
 		this.#api = api;
 		for(var k in data) {
 			if(KEYS[k]) {

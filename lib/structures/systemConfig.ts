@@ -30,17 +30,25 @@ const KEYS = {
 	member_default_private: {
 		transform: (v) => v ? true : false
 	},
-	group_default_prviate: {
+	group_default_private: {
 		transform: (v) => v ? true : false
 	},
 	member_limit: { },
 	group_limit: { }
 }
 
-export default class SystemSettings {
+export default class SystemConfig {
 	#api;
 
-	constructor(api, data = { }) {
+	timezone?: string;
+	pings_enabled?: boolean;
+	latch_timeout?: number;
+	member_default_private?: boolean;
+	group_default_private?: boolean;
+	member_limit?: number;
+	group_limit?: number;
+
+	constructor(api, data: Partial<SystemConfig> = { }) {
 		this.#api = api;
 		for(var k in data) {
 			if(KEYS[k]) {
@@ -50,19 +58,19 @@ export default class SystemSettings {
 		}
 	}
 
-	async patch(token) {
-		var data = await this.#api.patchSystemSettings({...this, token});
+	async patch(token?: string) {
+		var data = await this.#api.patchSystemConfig({...this, token});
 		for(var k in data) if(KEYS[k]) this[k] = data[k];
 		return this;
 	}
 
 	async verify() {
-		var settings = {};
+		var config = {};
 		var errors = [];
 		for(var k in KEYS) {
 			var test = true;
 			if(this[k] == null) {
-				settings[k] = this[k];
+				config[k] = this[k];
 				continue;
 			}
 			if(this[k] == undefined) continue;
@@ -73,11 +81,11 @@ export default class SystemSettings {
 				continue;
 			}
 			if(KEYS[k].transform) this[k] = KEYS[k].transform(this[k]);
-			settings[k] = this[k];
+			config[k] = this[k];
 		}
 
 		if(errors.length) throw new Error(errors.join("\n"));
 
-		return settings;
+		return config;
 	}
 }

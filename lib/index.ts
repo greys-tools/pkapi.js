@@ -1,30 +1,54 @@
 import axios from 'axios';
 
-import System from './structures/system.js';
-import Member from './structures/member.js';
-import Group from './structures/group.js';
-import Switch from './structures/switch.js';
-import Message from './structures/message.js';
-import SystemSettings from './structures/systemSettings.js';
-import SystemGuildSettings from './structures/systemGuildSettings.js';
-import MemberGuildSettings from './structures/memberGuildSettings.js';
+import System from './structures/system';
+import Member from './structures/member';
+import Group from './structures/group';
+import Switch from './structures/switch';
+import Message from './structures/message';
+import SystemConfig from './structures/systemConfig';
+import SystemGuildSettings from './structures/systemGuildSettings';
+import MemberGuildSettings from './structures/memberGuildSettings';
 
-import APIError from './structures/apiError.js';
+import APIError from './structures/apiError';
 
-import ROUTES from './routes.js';
+import ROUTES from './routes';
+
+export interface APIData {
+	base_url?: string;
+	version?: number;
+	token?: string;
+}
+
+export interface RequestOptions {
+	token?: string;
+}
+
+export interface GetSystemOptions extends RequestOptions {
+	system?: string;
+	fetch?: Array<SystemFetchOptions>;
+	raw?: boolean;
+}
+
+export const enum SystemFetchOptions {
+	Members = 'members',
+	Fronters = 'fronters',
+	Switches = 'switches',
+	Groups = 'groups',
+	Config = 'config',
+}
 
 class PKAPI {
-	#token;
+	#token?: string;
 	#inst;
-	#_base;
-	#_version;
+	#_base: string = 'https://api.pluralkit.me';
+	#_version: number = 2;
 
 	#version_warning = false;
 	
-	constructor(data = {}) {
-		this.#_base = data.base_url || 'https://api.pluralkit.me';
-		this.#_version = data.version || 2;
-		this.#token = data.token;
+	constructor(data?: APIData) {
+		this.#_base = (data?.base_url ?? 'https://api.pluralkit.me');
+		this.#_version = (data?.version ?? 2);
+		this.#token = data?.token;
 
 		this.#inst = axios.create({
 			validateStatus: (s) => s < 300 && s > 100,
@@ -36,8 +60,8 @@ class PKAPI {
 	**			SYSTEM FUNCTIONS
 	*/
 	
-	async getSystem(data = {}) {
-		var token = this.#token || data.token;
+	async getSystem(data: GetSystemOptions = { }) {
+		var token = this.#token ?? data.token;
 		if(data.system == null && !token) throw new Error('Must provide a token or ID.');
 		var sys;
 		var resp;
@@ -46,17 +70,17 @@ class PKAPI {
 				resp = await this.handle(ROUTES[this.#_version].GET_OWN_SYSTEM(), {token});
 				sys = new System(this, resp.data);
 			} else {
-				if(data.system.length > 5) resp = await this.handle(ROUTES[this.#_version].GET_ACCOUNT(data.system));
-				else resp = await this.handle(ROUTES[this.#_version].GET_SYSTEM(data.system));
+				if(data.system!.length > 5) resp = await this.handle(ROUTES[this.#_version].GET_ACCOUNT(data.system));
+				else resp = await this.handle(ROUTES[this.#_version].GET_SYSTEM(data.system!));
 				sys = new System(this, resp.data);
 			}
 
 			if(data.fetch) {
-				if(data.fetch.includes("members")) sys.members = await sys.getMembers(token);
-				if(data.fetch.includes("fronters")) sys.fronters = await sys.getFronters(token);
-				if(data.fetch.includes("switches")) sys.switches = await sys.getSwitches(token, data.raw);
-				if(data.fetch.includes("groups")) sys.groups = await sys.getGroups(token);
-				if(data.fetch.includes("settings")) sys.config = await sys.getSettings(token);
+				if(data.fetch.includes(SystemFetchOptions.Members)) sys.members = await sys.getMembers(token);
+				if(data.fetch.includes(SystemFetchOptions.Fronters)) sys.fronters = await sys.getFronters(token);
+				if(data.fetch.includes(SystemFetchOptions.Switches)) sys.switches = await sys.getSwitches(token, data.raw);
+				if(data.fetch.includes(SystemFetchOptions.Groups)) sys.groups = await sys.getGroups(token);
+				if(data.fetch.includes(SystemFetchOptions.Config)) sys.config = await sys.getSettings(token);
 			}
 		} catch(e) {
 			throw e;
@@ -65,12 +89,12 @@ class PKAPI {
 		return sys;
 	}
 
-	async getAccount(data = {}) {
+	async getAccount(data: GetSystemOptions = {}) {
 		return await this.getSystem(data);
 	}
 
-	async patchSystem(data = {}) {
-		var token = this.#token || data.token;
+	async patchSystem(data: System | Partial<System> = {}) {
+		var token = this.#token ?? data.token;
 		if(!token) throw new Error("PATCH requires a token.");
 
 		try {
@@ -84,39 +108,39 @@ class PKAPI {
 		return new System(this, sys.data);
 	}
 
-	async getSystemSettings(data = {}) {
+	async getSystemConfig(data: RequestOptions = {}) {
 		if(this.version < 2) throw new Error("System settings are only available for API version 2.");
 
 		var token = this.#token || data.token;
 		if(!token) throw new Error("Getting system settings requires a token.");
 
 		try {
-			var resp = await this.handle(ROUTES[this.#_version].GET_SYSTEM_SETTINGS(), {token});
+			var resp = await this.handle(ROUTES[this.#_version].GET_SYSTEM_CONFIG(), {token});
 		} catch(e) {
 			throw e;
 		}
 
-		return new SystemSettings(this, resp.data);
+		return new SystemConfig(this, resp.data);
 	}
 
-	async patchSystemSettings(data = {}) {
+	async patchSystemConfig(data: SystemConfig | Partial<SystemConfig> = {}) {
 		if(this.version < 2) throw new Error("System settings are only available for API version 2.");
 
 		var token = this.#token || data.token;
 		if(!token) throw new Error("PATCH requires a token.");
 
 		try {
-			var settings = data instanceof SystemSettings ? data : new SystemSettings(this, data);
+			var settings = data instanceof SystemConfig ? data : new SystemConfig(this, data);
 			var body = await settings.verify();
 			settings = await this.handle(
-				ROUTES[this.#_version].PATCH_SYSTEM_SETTINGS(),
+				ROUTES[this.#_version].PATCH_SYSTEM_CONFIG(),
 				{token, body}
 			);
 		} catch(e) {
 			throw e;
 		}
 
-		return new SystemSettings(this, settings.data);
+		return new SystemConfig(this, settings.data);
 	}
 
 	async getSystemGuildSettings(data = {}) {

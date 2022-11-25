@@ -1,4 +1,4 @@
-import Member from "./member.js";
+import Member from "./member";
 
 const KEYS = {
 	id: { },
@@ -15,11 +15,14 @@ const KEYS = {
 		}
 	}
 }
-
 export default class Switch {
 	#api;
+
+	id: string;
+	timestamp: Date | string;
+	members?: Map<Member> | Array<string>;
 	
-	constructor(api, data) {
+	constructor(api, data: Partial<Switch>) {
 		this.#api = api;
 		if(!data.timestamp || !data.members)
 			throw new Error("Switch objects require a timestamp and members key");
@@ -32,19 +35,19 @@ export default class Switch {
 		}
 	}
 
-	async patchTimestamp(timestamp, token) {
+	async patchTimestamp(timestamp: Date, token?: string) {
 		var data = await this.#api.patchSwitchTimestamp({switch: this.id, timestamp, token});
 		for(var k in data) if(KEYS[k]) this[k] = data[k];
 		return this;
 	}
 
-	async patchMembers(token, members) {
+	async patchMembers(token?: string, members?: Array<string>) {
 		var data = await this.#api.patchSwitchMembers({switch: this.id, members, token});
 		for(var k in data) if(KEYS[k]) this[k] = data[k];
 		return this;
 	}
 
-	async delete(token) {
+	async delete(token?: string) {
 		return await this.#api.deleteSwitch({switch: this.id, token});
 	}
 

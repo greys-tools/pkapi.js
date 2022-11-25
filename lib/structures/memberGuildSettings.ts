@@ -19,11 +19,14 @@ const KEYS = {
 		err: "Avatar URL must be a valid image and less than 256 characters"
 	}
 }
-
 export default class MemberGuildSettings {
 	#api;
 
-	constructor(api, data) {
+	guild: string;
+	display_name?: string;
+	avatar_url?: string;
+
+	constructor(api, data: Partial<MemberGuildSettings>) {
 		this.#api = api;
 		for(var k in data) {
 			if(KEYS[k]) {
@@ -33,7 +36,7 @@ export default class MemberGuildSettings {
 		}
 	}
 
-	async patch(token) {
+	async patch(token?: string) {
 		var data = await this.#api.patchMemberGuildSettings({...this, token});
 		for(var k in data) if(KEYS[k]) this[k] = data[k];
 		return this;

@@ -1,12 +1,12 @@
 {
   "name": "pkapi.js",
   "version": "4.0.1",
-  "main": "./lib/index.js",
-  "type": "module",
+  "main": "./dist/cjs/index.cjs",
+  "module": "./dist/esm/index.js",
   "exports": {
-    ".": {
+    "dist/": {
       "require": "./dist/cjs/index.cjs",
-      "import": "./lib/index.js"
+      "import": "./dist/esm/index.js"
     }
   },
   "dependencies": {
@@ -18,11 +18,12 @@
   },
   "scripts": {
     "test": "exit 0",
-    "build": "esbuild lib/index.js --bundle --sourcemap --platform=node --format=cjs --outfile=dist/cjs/index.cjs"
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig-cjs.json",
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/greysdawn/pk.js.git"
+    "url": "git://github.com/greys-tools/pkapi.js.git"
   },
   "keywords": [
     "pluralkit",
@@ -33,11 +34,13 @@
   "author": "greysdawn <greysdawn@gmail.com> (https://greysdawn.com)",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/greysdawn/pk.js/issues"
+    "url": "https://github.com/greys-tools/pkapi.js/issues"
   },
-  "homepage": "https://github.com/greysdawn/pk.js#readme",
+  "homepage": "https://github.com/greys-tools/pkapi.js#readme",
   "description": "A JS wrapper for the PluralKit Discord bot's API.",
   "devDependencies": {
-    "esbuild": "^0.15.15"
+    "@types/node": "^18.11.9",
+    "esbuild": "^0.15.15",
+    "typescript": "^4.9.3"
   }
 }

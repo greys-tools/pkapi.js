@@ -1,8 +1,15 @@
+export const enum AutoProxyModes {
+	Off = 'off',
+	Front = 'front',
+	Latch = 'latch',
+	Member = 'member'
+}
+
 const apVals = [
-	'off',
-	'front',
-	'latch',
-	'member'
+	AutoProxyValues.Off,
+	AutoProxyValues.Front,
+	AutoProxyValues.Latch,
+	AutoProxyValues.Member
 ]
 
 const KEYS = {
@@ -27,6 +34,12 @@ const KEYS = {
 export default class SystemGuildSettings {
 	#api;
 
+	guild: string;
+	proxying_enabled?: boolean;
+	autoproxy_mode?: AutoProxyValues;
+	tag?: string;
+	tag_enabled?: boolean;
+
 	constructor(api, data = { }) {
 		this.#api = api;
 		for(var k in data) {
@@ -37,7 +50,7 @@ export default class SystemGuildSettings {
 		}
 	}
 
-	async patch(token) {
+	async patch(token?: string) {
 		var data = await this.#api.patchSystemGuildSettings({...this, token});
 		for(var k in data) if(KEYS[k]) this[k] = data[k];
 		return this;

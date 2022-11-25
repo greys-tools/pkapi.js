@@ -1,5 +1,5 @@
 export default class APIError {
-	constructor(api, data = {}) {
+	constructor(api, data: any = {}) {
 		this.api = {
 			baseURL: api.base_url,
 			token: api.token,

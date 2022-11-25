@@ -5,7 +5,7 @@ import * as chrono from 'chrono-node';
 import {
 	validatePrivacy,
 	formatDate
-} from '../utils.js';
+} from '../utils';
 
 const parser = chrono.casual.clone();
 parser.refiners.push({
@@ -18,7 +18,7 @@ parser.refiners.push({
 	}
 })
 
-function hasKeys(obj, keys) {
+function hasKeys(obj: any, keys: Array<string>) {
 	if(typeof obj !== "object") return false;
 	var okeys = Object.keys(obj);
 
@@ -27,15 +27,35 @@ function hasKeys(obj, keys) {
 	return true;
 }
 
+const enum MemberPrivacyKeys {
+	Visibility = 	'visibility',
+	Name = 			'name_privacy',
+	Description = 	'description_privacy',
+	Birthday = 		'birthday_privacy',
+	Pronouns = 		'pronoun_privacy',
+	Avatar = 		'avatar_privacy',
+	Metadata = 		'metadata_privacy'
+}
+
 const pKeys = [
-	'visibility',
-	'name_privacy',
-	'description_privacy',
-	'birthday_privacy',
-	'pronoun_privacy',
-	'avatar_privacy',
-	'metadata_privacy'
+	MemberPrivacyKeys.Visibility,
+	MemberPrivacyKeys.Name,
+	MemberPrivacyKeys.Description,
+	MemberPrivacyKeys.Birthday,
+	MemberPrivacyKeys.Pronouns,
+	MemberPrivacyKeys.Avatar,
+	MemberPrivacyKeys.Metadata
 ]
+
+export interface MemberPrivacy {
+	visibility?: string;
+	name_privacy?: string;
+	description_privacy?: string;
+	birthday_privacy?: string;
+	pronoun_privacy?: string;
+	avatar_privacy?: string;
+	metadata_privacy?: string;
+}
 
 const KEYS = {
 	id: { },
@@ -119,10 +139,31 @@ const KEYS = {
 	}
 }
 
+export interface ProxyTags {
+	prefix?: string;
+	suffix?: string;
+}
+
 export default class Member {
 	#api;
+
+	id: string;
+	uuid: string;
+	system: string;
+	name: string;
+	display_name?: string;
+	description?: string;
+	pronouns?: string;
+	color?: string;
+	avatar_url?: string;
+	banner?: string;
+	birthday?: Date | string;
+	proxy_tags?: Array[ProxyTags];
+	keep_proxy?: boolean;
+	created: Date | string;
+	privacy: MemberPrivacy;
 	
-	constructor(api, data) {
+	constructor(api, data: Partial<Member>) {
 		this.#api = api;
 		for(var k in data) {
 			if(KEYS[k]) {
@@ -132,44 +173,44 @@ export default class Member {
 		}
 	}
 
-	async patch(token) {
+	async patch(token?: string) {
 		var data = await this.#api.patchMember({member: this.id, ...this, token});
 		for(var k in data) if(KEYS[k]) this[k] = data[k];
 		return this;
 	}
 
-	async delete(token) {
+	async delete(token?: string) {
 		return await this.#api.deleteMember({member: this.id, token});
 	}
 
-	async getGroups(token) {
+	async getGroups(token?: string) {
 		var groups = await this.#api.getMemberGroups({member: this.id, token});
 		this.groups = groups;
 		return groups;
 	}
 
-	async addGroups(groups, token) {
+	async addGroups(groups: Array<string>, token?: string) {
 		await this.#api.addMemberGroups({member: this.id, groups, token});
 		var grps = await this.getGroups(token);
 		this.groups = grps;
 		return grps;
 	}
 
-	async removeGroups(groups, token) {
+	async removeGroups(groups: Array<string>, token?: string) {
 		await this.#api.removeMemberGroups({member: this.id, groups, token});
 		var grps = await this.getGroups(token);
 		this.groups = grps;
 		return grps;
 	}
 
-	async setGroups(groups, token) {
+	async setGroups(groups: Array<string>, token?: string) {
 		await this.#api.setMemberGroups({member: this.id, groups, token});
 		var grps = await this.getGroups(token);
 		this.groups = grps;
 		return grps;
 	}
 
-	async getGuildSettings(guild, token) {
+	async getGuildSettings(guild: string, token?: string) {
 		var settings = await this.#api.getMemberGuildSettings({member: this.id, guild, token});
 		if(!this.settings) this.settings = new Map();
 		this.settings.set(guild, settings);

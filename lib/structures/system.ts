@@ -1,7 +1,21 @@
 import tc from 'tinycolor2';
 import axios from 'axios';
 import validUrl from 'valid-url';
-import { validatePrivacy } from '../utils.js';
+import { validatePrivacy } from '../utils';
+
+import Member from './member';
+import Group from './member';
+import Switch from './switch';
+import SystemGuildSettings from './systemGuildSettings';
+import SystemConfig from './systemConfig';
+
+export const enum SystemPrivacyKeys {
+	Description = 'description_privacy',
+	MemberList = 'member_list_privacy',
+	GroupList = 'group_list_privacy',
+	Front = 'front_privacy',
+	FrontHistory = 'front_history_privacy'
+}
 
 const pKeys = [
 	'description_privacy',
@@ -10,6 +24,14 @@ const pKeys = [
 	'front_privacy',
 	'front_history_privacy'
 ]
+
+export interface SystemPrivacy {
+	description_privacy?: string;
+	member_list_privacy?: string;
+	group_list_privacy?: string;
+	front_privacy?: string;
+	front_history_privacy?: string;
+}
 
 const KEYS = {
 	id: { },
@@ -60,8 +82,26 @@ const KEYS = {
 
 export default class System {
 	#api;
+
+	id: string;
+	uuid: string;
+	name?: string;
+	description?: string;
+	tag?: string;
+	avatar_url?: string;
+	banner?: string;
+	color?: string;
+	created: Date | string;
+	privacy: SystemPrivacy;
+
+	members?: Map<string, Member>;
+	groups?: Map<string, Group>;
+	fronters?: Switch;
+	switches?: Map<string, Switch>;
+	settings?: Map<string, SystemGuildSettings>;
+	config?: SystemSettings;
 	
-	constructor(api, data) {
+	constructor(api, data: Partial<System>) {
 		this.#api = api;
 		for(var k in data) {
 			if(KEYS[k]) {
@@ -71,93 +111,93 @@ export default class System {
 		}
 	}
 
-	async patch(token) {
+	async patch(token?: string) {
 		var data = await this.#api.patchSystem({system: this.id, ...this, token});
 		for(var k in data) if(KEYS[k]) this[k] = data[k];
 		return this;
 	}
 
-	async createMember(data) {
+	async createMember(data: Partial<Member>) {
 		var mem = await this.#api.createMember(data);
 		if(!this.members) this.members = new Map();
 		this.members.set(mem.id, mem);
 		return mem;
 	}
 
-	async getMember(member, token) {
+	async getMember(member: string, token?: string) {
 		var mem = await this.#api.getMember({member, token});
 		if(!this.members) this.members = new Map();
 		this.members.set(mem.id, mem);
 		return mem;
 	}
 
-	async getMembers(token) {
+	async getMembers(token?: string) {
 		var mems = await this.#api.getMembers({system: this.id, token});
 		this.members = mems;
 		return mems;
 	}
 
-	async deleteMember(member, token) {
+	async deleteMember(member?: string, token?: string) {
 		await this.#api.deleteMember({member, token});
 		if(this.members) this.members.delete(member);
 		return;
 	}
 
-	async createGroup(data) {
+	async createGroup(data: Partial<Group>) {
 		var group = await this.#api.createGroup(data);
 		if(!this.groups) this.groups = new Map();
 		this.groups.set(group.id, group);
 		return group;
 	}
 
-	async getGroups(token) {
+	async getGroups(token?: string) {
 		var groups = await this.#api.getGroups({system: this.id, token});
 		this.groups = groups;
 		return groups;
 	}
 
-	async getGroup(group, token) {
+	async getGroup(group: string, token?: string) {
 		var grp = await this.#api.getGroups({system: this.id, group, token});
 		if(!this.groups) this.groups = new Map();
 		this.groups.set(grp.id, grp)
 		return grp;
 	}
 
-	async deleteGroup(group, token) {
+	async deleteGroup(group: string, token?: string) {
 		await this.#api.deleteGroup({group, token});
 		if(this.groups) this.groups.delete(group);
 		return;
 	}
 
-	async createSwitch(data) {
+	async createSwitch(data: Partial<Switch>) {
 		return this.#api.createSwitch(data);
 	}
 
-	async getSwitches(token, raw = false) {
+	async getSwitches(token?: string, raw: boolean = false) {
 		var switches = await this.#api.getSwitches({system: this.id, token, raw});
 		this.switches = switches;
 		return switches;
 	}
 
-	async getFronters(token) {
+	async getFronters(token?: string) {
 		var fronters = await this.#api.getFronters({system: this.id, token})
 		this.fronters = fronters;
 		return fronters;
 	}
 
-	async deleteSwitch(switchid, token) {
+	async deleteSwitch(switchid?: string, token?: string) {
 		await this.#api.deleteSwitch({switch: switchid, token});
 		if(this.switches) this.switches.delete(switchid);
 		return;
 	}
 
-	async getSettings(token) {
+	async getSettings(token?: string) {
 		var settings = await this.#api.getSystemSettings({token});
 		this.config = settings;
 		return settings;
 	}
 
-	async getGuildSettings(guild, token) {
+	async getGuildSettings(guild: string, token?: string) {
 		var settings = await this.#api.getSystemGuildSettings({guild, token});
 		if(!this.settings) this.settings = new Map();
 		this.settings.set(guild, settings);

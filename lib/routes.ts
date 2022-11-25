@@ -1,4 +1,4 @@
-const ROUTES = {
+const ROUTES: any = {
 	1: {
 		GET_SYSTEM: (sid) => ({method: 'GET', route: `/s/${sid}`}),
 		GET_OWN_SYSTEM: () => ({method: 'GET', route: `/s`}),
@@ -52,8 +52,8 @@ const ROUTES = {
 		PATCH_SWITCH_MEMBERS: (swid) => ({method: 'PATCH', route: `/systems/@me/switches/${swid}/members`}),
 		DELETE_SWITCH: (swid) => ({method: 'DELETE', route: `/systems/@me/switches/${swid}`}),
 
-		GET_SYSTEM_SETTINGS: () => ({method: 'GET', route: `/systems/@me/settings`}),
-		PATCH_SYSTEM_SETTINGS: () => ({method: 'PATCH', route: `/systems/@me/settings`}),
+		GET_SYSTEM_CONFIG: () => ({method: 'GET', route: `/systems/@me/settings`}),
+		PATCH_SYSTEM_CONFIG: () => ({method: 'PATCH', route: `/systems/@me/settings`}),
 		GET_SYSTEM_GUILD_SETTINGS: (gid) => ({method: 'GET', route: `/systems/@me/guilds/${gid}`}),
 		PATCH_SYSTEM_GUILD_SETTINGS: (gid) => ({method: 'PATCH', route: `/systems/@me/guilds/${gid}`}),
 		GET_MEMBER_GUILD_SETTINGS: (mid, gid) => ({method: 'GET', route: `/members/${mid}/guilds/${gid}`}),

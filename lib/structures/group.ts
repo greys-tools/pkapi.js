@@ -1,13 +1,28 @@
 import axios from 'axios';
 import validUrl from 'valid-url';
-import { validatePrivacy } from '../utils.js';
+import { validatePrivacy } from '../utils';
+import Member from './Member';
+
+export const enum GroupPrivacyKeys {
+	Description = 'description_privacy',
+	Icon = 'icon_privacy',
+	List = 'list_privacy',
+	Visibility = 'visibility',
+}
 
 const pKeys = [
-	'description_privacy',
-	'icon_privacy',
-	'list_privacy',
-	'visibility'
+	GroupPrivacyKeys.Description,
+	GroupPrivacyKeys.Icon,
+	GroupPrivacyKeys.List,
+	GroupPrivacyKeys.Visibility
 ]
+
+export interface GroupPrivacy {
+	description_privacy?: string;
+	icon_privacy?: string;
+	list_privacy?: string;
+	visibility?: string;
+}
 
 const KEYS = {
 	id: { },
@@ -62,8 +77,21 @@ const KEYS = {
 
 export default class Group {
 	#api;
+
+	id: string;
+	uuid: string;
+	name: string;
+	display_name: string;
+	description: string;
+	icon: string;
+	banner: string;
+	color: string | Object;
+	created: Date | string;
+	privacy: GroupPrivacy;
+
+	members?: Map<string, Member>;
 	
-	constructor(api, data) {
+	constructor(api, data: Partial<Group>) {
 		this.#api = api;
 		for(var k in data) {
 			if(KEYS[k]) {
@@ -73,37 +101,37 @@ export default class Group {
 		}
 	}
 
-	async patch(token) {
+	async patch(token?: string) {
 		var data = await this.#api.patchGroup({group: this.id, ...this, token});
 		for(var k in data) if(KEYS[k]) this[k] = data[k];
 		return this;
 	}
 
-	async delete(token) {
+	async delete(token?: string) {
 		return await this.#api.deleteGroup({group: this.id, token});
 	}
 
-	async getMembers(token) {
+	async getMembers(token?: string) {
 		var mems = await this.#api.getGroupMembers({group: this.id, token});
 		this.members = mems;
 		return mems;
 	}
 
-	async addMembers(members, token) {
+	async addMembers(members: Array<string>, token?: string) {
 		await this.#api.addGroupMembers({group: this.id, members, token});
 		var mems = await this.getMembers(token);
 		this.members = mems;
 		return mems;
 	}
 
-	async removeMembers(members, token) {
+	async removeMembers(members: Array<string>, token?: string) {
 		await this.#api.removeGroupMembers({group: this.id, members, token});
 		var mems = await this.getMembers(token);
 		this.members = mems;
 		return mems;
 	}
 
-	async setMembers(members, token) {
+	async setMembers(members: Array<string>, token?: string) {
 		await this.#api.setGroupMembers({group: this.id, members, token});
 		var mems = await this.getMembers(token);
 		this.members = mems;

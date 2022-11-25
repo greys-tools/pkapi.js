@@ -3,3 +3,4 @@ test.js
 .env
 wiki/
 *.tgz
+dist/
