@@ -2,7 +2,7 @@
 *A PluralKit API wrapper for JavaScript*
 
 ## About
-[PluralKit](https://github.com/xske/pluralkit) is an 
+[PluralKit](https://github.com/PluralKit/PluralKit) is an 
 incredibly useful tool for plurals, trans folks, and roleplayers that 
 comes with an API for use alongside the bot. 
 This wrapper was created to make interacting with the API in Node.js applications easier
@@ -22,7 +22,7 @@ With **Node 14.x or higher**, use this to install:
 ## Dependencies
 This library uses only a few dependencies, which are:
 - axios - for request handling
-- @vvo/tzdb - for verifying timezone
+- @vvo/tzdb - for verifying timezones
 - chrono-node - for parsing birthdays
 - tinycolor2 - for parsing colors
 - valid-url - for verifying avatar urls
@@ -31,7 +31,11 @@ This library uses only a few dependencies, which are:
 The wrapper itself requires **zero setup.** However, there are still some options you can use:
 
 ```js
-const PKAPI = require('pkapi.js');
+// cjs, or commonJS
+const PKAPI = require('pkapi.js').default;
+
+// esm
+import PKAPI from 'pkapi.js';
 
 // shown values are defaults!
 const api = new PKAPI({
