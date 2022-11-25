@@ -1,19 +1,24 @@
 {
+  "name": "pkapi.js",
+  "version": "4.0.0",
+  "main": "./lib/index.js",
+  "type": "module",
+  "exports": {
+    ".": {
+      "require": "./dist/cjs/index.js",
+      "import": "./lib/index.js"
+    }
+  },
   "dependencies": {
     "@vvo/tzdb": "^6.7.0",
     "axios": "^0.21.1",
-    "chrono-node": "^2.2.7",
+    "chrono-node": "^2.4.2",
     "tinycolor2": "^1.4.2",
     "valid-url": "^1.0.9"
   },
-  "name": "pkapi.js",
-  "version": "3.1.1",
-  "main": "index.js",
-  "directories": {
-    "lib": "lib"
-  },
   "scripts": {
-    "test": "exit 0"
+    "test": "exit 0",
+    "build": "esbuild lib/index.js --bundle --sourcemap --platform=node --format=cjs --outfile=dist/cjs/index.js"
   },
   "repository": {
     "type": "git",
@@ -31,5 +36,8 @@
     "url": "https://github.com/greysdawn/pk.js/issues"
   },
   "homepage": "https://github.com/greysdawn/pk.js#readme",
-  "description": "A JS wrapper for the PluralKit Discord bot's API."
+  "description": "A JS wrapper for the PluralKit Discord bot's API.",
+  "devDependencies": {
+    "esbuild": "^0.15.15"
+  }
 }
