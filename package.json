@@ -1,11 +1,11 @@
 {
   "name": "pkapi.js",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "main": "./lib/index.js",
   "type": "module",
   "exports": {
     ".": {
-      "require": "./dist/cjs/index.js",
+      "require": "./dist/cjs/index.cjs",
       "import": "./lib/index.js"
     }
   },
@@ -18,7 +18,7 @@
   },
   "scripts": {
     "test": "exit 0",
-    "build": "esbuild lib/index.js --bundle --sourcemap --platform=node --format=cjs --outfile=dist/cjs/index.js"
+    "build": "esbuild lib/index.js --bundle --sourcemap --platform=node --format=cjs --outfile=dist/cjs/index.cjs"
   },
   "repository": {
     "type": "git",
