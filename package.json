@@ -40,6 +40,8 @@
   "description": "A JS wrapper for the PluralKit Discord bot's API.",
   "devDependencies": {
     "@types/node": "^18.11.9",
+    "@types/tinycolor2": "^1.4.3",
+    "@types/valid-url": "^1.0.3",
     "esbuild": "^0.15.15",
     "typescript": "^4.9.3"
   }

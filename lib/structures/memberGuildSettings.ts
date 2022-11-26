@@ -1,14 +1,16 @@
+import API from '../index';
+
 import axios from 'axios';
 import validUrl from 'valid-url';
 
-const KEYS = {
+const KEYS: any = {
 	guild: { },
 	display_name: {
-		test: (s) => s.length <= 100,
+		test: (s: string) => s.length <= 100,
 		err: 'Display name must be 100 characters or less'
 	},
 	avatar_url: {
-		test: async (a) => {
+		test: async (a: string) => {
 			if(!validUrl.isWebUri(a)) return false;
 			try {
 				var data = await axios.head(a);
@@ -19,14 +21,22 @@ const KEYS = {
 		err: "Avatar URL must be a valid image and less than 256 characters"
 	}
 }
-export default class MemberGuildSettings {
-	#api;
+
+export interface IMemberGuildSettings {
+	[key: string]: any;
 
 	guild: string;
 	display_name?: string;
 	avatar_url?: string;
+}
 
-	constructor(api, data: Partial<MemberGuildSettings>) {
+export default class MemberGuildSettings implements IMemberGuildSettings {
+	[key: string]: any;
+
+	#api: API;
+	guild = '';
+
+	constructor(api: API, data: Partial<MemberGuildSettings>) {
 		this.#api = api;
 		for(var k in data) {
 			if(KEYS[k]) {
@@ -43,7 +53,7 @@ export default class MemberGuildSettings {
 	}
 
 	async verify() {
-		var settings = {};
+		var settings: Partial<MemberGuildSettings> = {};
 		var errors = [];
 		for(var k in KEYS) {
 			var test = true;

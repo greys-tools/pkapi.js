@@ -1,13 +1,13 @@
 import axios from 'axios';
 
-import System from './structures/system';
-import Member from './structures/member';
-import Group from './structures/group';
-import Switch from './structures/switch';
-import Message from './structures/message';
-import SystemConfig from './structures/systemConfig';
-import SystemGuildSettings from './structures/systemGuildSettings';
-import MemberGuildSettings from './structures/memberGuildSettings';
+import System, {ISystem} from './structures/system';
+import Member, {IMember} from './structures/member';
+import Group, {IGroup} from './structures/group';
+import Switch, {ISwitch} from './structures/switch';
+import Message, {IMessage} from './structures/message';
+import SystemConfig, {ISystemConfig} from './structures/systemConfig';
+import SystemGuildSettings, {ISystemGuildSettings} from './structures/systemGuildSettings';
+import MemberGuildSettings, {IMemberGuildSettings} from './structures/memberGuildSettings';
 
 import APIError from './structures/apiError';
 
@@ -35,6 +35,10 @@ export const enum SystemFetchOptions {
 	Switches = 'switches',
 	Groups = 'groups',
 	Config = 'config',
+}
+
+export type RequestData<T extends {}> = T & {
+	token?: string;
 }
 
 class PKAPI {
@@ -100,12 +104,12 @@ class PKAPI {
 		try {
 			var sys = data instanceof System ? data : new System(this, data);
 			var body = await sys.verify();
-			sys = await this.handle(ROUTES[this.#_version].PATCH_SYSTEM(), {token, body});
+			var resp = await this.handle(ROUTES[this.#_version].PATCH_SYSTEM(), {token, body});
 		} catch(e) {
 			throw e;
 		}
 
-		return new System(this, sys.data);
+		return new System(this, resp.data);
 	}
 
 	async getSystemConfig(data: RequestOptions = {}) {
@@ -123,7 +127,7 @@ class PKAPI {
 		return new SystemConfig(this, resp.data);
 	}
 
-	async patchSystemConfig(data: SystemConfig | Partial<SystemConfig> = {}) {
+	async patchSystemConfig(data: RequestData<ISystemConfig>) {
 		if(this.version < 2) throw new Error("System settings are only available for API version 2.");
 
 		var token = this.#token || data.token;
@@ -132,7 +136,7 @@ class PKAPI {
 		try {
 			var settings = data instanceof SystemConfig ? data : new SystemConfig(this, data);
 			var body = await settings.verify();
-			settings = await this.handle(
+			var resp = await this.handle(
 				ROUTES[this.#_version].PATCH_SYSTEM_CONFIG(),
 				{token, body}
 			);
@@ -140,10 +144,10 @@ class PKAPI {
 			throw e;
 		}
 
-		return new SystemConfig(this, settings.data);
+		return new SystemConfig(this, resp.data);
 	}
 
-	async getSystemGuildSettings(data = {}) {
+	async getSystemGuildSettings(data: { token?: string, guild: string}) {
 		if(this.version < 2) throw new Error("Guild settings are only available for API version 2.");
 
 		var token = this.#token || data.token;
@@ -159,7 +163,7 @@ class PKAPI {
 		return new SystemGuildSettings(this, {...resp.data, guild: data.guild});
 	}
 
-	async patchSystemGuildSettings(data = {}) {
+	async patchSystemGuildSettings(data: RequestData<ISystemGuildSettings>) {
 		if(this.version < 2) throw new Error("Guild settings are only available for API version 2.");
 
 		var token = this.#token || data.token;
@@ -169,7 +173,7 @@ class PKAPI {
 		try {
 			var settings = data instanceof SystemGuildSettings ? data : new SystemGuildSettings(this, data);
 			var body = await settings.verify();
-			settings = await this.handle(
+			var resp = await this.handle(
 				ROUTES[this.#_version].PATCH_SYSTEM_GUILD_SETTINGS(data.guild),
 				{token, body}
 			);
@@ -177,29 +181,29 @@ class PKAPI {
 			throw e;
 		}
 
-		return new SystemGuildSettings(this, {...settings.data, guild: data.guild});
+		return new SystemGuildSettings(this, {...resp.data, guild: data.guild});
 	}
 
 	/*
 	**			MEMBER FUNCTIONS
 	*/
 
-	async createMember(data = {}) {
+	async createMember(data: RequestData<IMember>) {
 		var token = this.#token || data.token;
 		if(!token) throw new Error("POST requires a token.");
 
 		try {
 			var mem = new Member(this, data);
 			var body = await mem.verify();
-			mem = await this.handle(ROUTES[this.#_version].ADD_MEMBER(), {token, body});
+			var resp = await this.handle(ROUTES[this.#_version].ADD_MEMBER(), {token, body});
 		} catch(e) {
 			throw e;
 		}
 
-		return new Member(this, mem.data);
+		return new Member(this, resp.data);
 	}
 
-	async getMember(data = {}) {
+	async getMember(data: { token?: string, member: string  }) {
 		if(data.member == null) throw new Error('Must provide a member ID.');
 		var token = this.#token || data.token;
 		try {
@@ -211,7 +215,7 @@ class PKAPI {
 		return new Member(this, resp.data);
 	}
 
-	async getMembers(data = {}) {
+	async getMembers(data: { token?: string, system: string }) {
 		var token = this.#token || data.token;
 		var system = data.system ?? '@me';
 		try {
@@ -221,10 +225,10 @@ class PKAPI {
 		}
 
 		var mems = resp.data.map(m => [m.id, new Member(this, m)]);
-		return new Map(mems);
+		return new Map<string, Member>(mems);
 	}
 
-	async patchMember(data = {}) {
+	async patchMember(data: RequestData<IMember>) {
 		if(data.member == null) throw new Error("Must provide a member ID.");
 		var token = this.#token || data.token;
 		if(!token) throw new Error("PATCH requires a token.");
@@ -232,15 +236,15 @@ class PKAPI {
 		try {
 			var mem = data instanceof Member ? data : new Member(this, data);
 			var body = await mem.verify();
-			mem = await this.handle(ROUTES[this.#_version].PATCH_MEMBER(data.member), {token, body});
+			var resp = await this.handle(ROUTES[this.#_version].PATCH_MEMBER(data.member), {token, body});
 		} catch(e) {
 			throw e;
 		}
 
-		return new Member(this, mem.data);
+		return new Member(this, resp.data);
 	}
 
-	async deleteMember(data = {}) {
+	async deleteMember(data: { token?: string, member: string }) {
 		if(data.member == null) throw new Error('Must provide a member ID.');
 		var token = this.#token || data.token;
 		if(!token) throw new Error("DELETE requires a token.");
@@ -253,7 +257,7 @@ class PKAPI {
 		return null;
 	}
 
-	async getMemberGroups(data = {}) {
+	async getMemberGroups(data: { token?: string, member: string }) {
 		if(this.version < 2) throw new Error("Groups are only available for API version 2.");
 
 		var token = this.#token || data.token;
@@ -269,10 +273,14 @@ class PKAPI {
 		}
 
 		var groups = resp.data.map(g => [g.id, new Group(this, g)]);
-		return new Map(groups);
+		return new Map<string, Group>(groups);
 	}
 
-	async addMemberGroups(data = {}) {
+	async addMemberGroups(data: {
+		token?: string,
+		member: string,
+		groups: string[] | Group[]
+	}) {
 		if(this.version < 2) throw new Error("Groups are only available for API version 2.");
 
 		var token = this.#token || data.token;
@@ -295,7 +303,11 @@ class PKAPI {
 		return;
 	}
 
-	async removeMemberGroups(data = {}) {
+	async removeMemberGroups(data: {
+		token?: string,
+		member: string,
+		groups: string[] | Group[]
+	}) {
 		if(this.version < 2) throw new Error("Groups are only available for API version 2.");
 
 		var token = this.#token || data.token;
@@ -318,7 +330,11 @@ class PKAPI {
 		return;
 	}
 
-	async setMemberGroups(data = {}) {
+	async setMemberGroups(data: {
+		token?: string,
+		member: string,
+		groups: string[] | Group[]
+	}) {
 		if(this.version < 2) throw new Error("Groups are only available for API version 2.");
 
 		var token = this.#token || data.token;
@@ -341,7 +357,11 @@ class PKAPI {
 		return;
 	}
 
-	async getMemberGuildSettings(data = {}) {
+	async getMemberGuildSettings(data: {
+		token?: string,
+		member: string,
+		guild: string
+	}) {
 		if(this.version < 2) throw new Error("Guild settings are only available for API version 2.");
 
 		var token = this.#token || data.token;
@@ -361,7 +381,7 @@ class PKAPI {
 		return new MemberGuildSettings(this, {...resp.data, guild: data.guild});
 	}
 
-	async patchMemberGuildSettings(data = {}) {
+	async patchMemberGuildSettings(data: RequestData<IMemberGuildSettings>) {
 		if(this.version < 2) throw new Error("Guild settings are only available for API version 2.");
 
 		var token = this.#token || data.token;
@@ -372,7 +392,7 @@ class PKAPI {
 		try {
 			var settings = data instanceof MemberGuildSettings ? data : new MemberGuildSettings(this, data);
 			var body = await settings.verify();
-			settings = await this.handle(
+			var resp = await this.handle(
 				ROUTES[this.#_version].PATCH_MEMBER_GUILD_SETTINGS(data.member, data.guild),
 				{token, body}
 			);
@@ -380,7 +400,7 @@ class PKAPI {
 			throw e;
 		}
 
-		return new MemberGuildSettings(this, {...settings.data, guild: data.guild});
+		return new MemberGuildSettings(this, {...resp.data, guild: data.guild});
 	}
 
 	/*
@@ -396,12 +416,12 @@ class PKAPI {
 		try {
 			var group = new Group(this, data);
 			var body = await group.verify();
-			group = await this.handle(ROUTES[this.#_version].ADD_GROUP(), {token, body});
+			var resp = await this.handle(ROUTES[this.#_version].ADD_GROUP(), {token, body});
 		} catch(e) {
 			throw e;
 		}
 
-		return new Group(this, group.data);
+		return new Group(this, resp.data);
 	}
 
 	async getGroups(data = {}) {
@@ -417,7 +437,7 @@ class PKAPI {
 		}
 
 		var groups = resp.data.map(g => [g.id, new Group(this, g)]);
-		return new Map(groups);
+		return new Map<string, Group>(groups);
 	}
 
 	async getGroup(data = {}) {
@@ -485,7 +505,7 @@ class PKAPI {
 		}
 
 		var mems = resp.data.map(m => [m.id, new Member(this, m)]);
-		return new Map(mems);
+		return new Map<string, Member>(mems);
 	}
 
 	async addGroupMembers(data = {}) {
@@ -763,7 +783,7 @@ class PKAPI {
 	
 	set base_url(s) {
 		this.#_base = s;
-		this.#inst.defaults.baseURL = `${this._base}/v${this._version}`;
+		this.#inst.defaults.baseURL = `${this.#_base}/v${this.#_version}`;
 	}
 
 	get base_url() {
@@ -772,7 +792,7 @@ class PKAPI {
 
 	set version(n) {
 		this.#_version = n;
-		this.#inst.defaults.baseURL = `${this._base}/v${this._version}`;
+		this.#inst.defaults.baseURL = `${this.#_base}/v${this.#_version}`;
 	}
 
 	get version() {

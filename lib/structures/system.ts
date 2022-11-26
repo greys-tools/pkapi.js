@@ -1,10 +1,12 @@
-import tc from 'tinycolor2';
+import API from '../index';
+
+import tc, { Instance } from 'tinycolor2';
 import axios from 'axios';
 import validUrl from 'valid-url';
 import { validatePrivacy } from '../utils';
 
 import Member from './member';
-import Group from './member';
+import Group from './group';
 import Switch from './switch';
 import SystemGuildSettings from './systemGuildSettings';
 import SystemConfig from './systemConfig';
@@ -33,20 +35,20 @@ export interface SystemPrivacy {
 	front_history_privacy?: string;
 }
 
-const KEYS = {
+const KEYS: any = {
 	id: { },
 	uuid: { },
 	name: {
-		test: (n) => !n.length || n.length <= 100,
+		test: (n: string) => !n.length || n.length <= 100,
 		err: "Name must be 100 characters or less"
 	},
 	description: {
-		test: (d) => !d.length || d.length < 1000,
+		test: (d: string) => !d.length || d.length < 1000,
 		err: "Description must be 1000 characters or less"
 	},
 	tag: { },
 	avatar_url: {
-		test: async (a) => {
+		test: async (a: string) => {
 			if(!validUrl.isWebUri(a)) return false;
 			try {
 				var data = await axios.head(a);
@@ -57,7 +59,7 @@ const KEYS = {
 		err: "Avatar URL must be a valid image and less than 256 characters"
 	},
 	banner: {
-		test: async (a) => {
+		test: async (a: string) => {
 			if(!validUrl.isWebUri(a)) return false;
 			try {
 				var data = await axios.head(a);
@@ -68,21 +70,19 @@ const KEYS = {
 		err: "Banner URL must be a valid image and less than 256 characters"
 	},
 	color: {
-		test: (c) => { c = tc(c); return c.isValid() },
+		test: (c: string | Instance) => { c = tc(c); return c.isValid() },
 		err: "Color must be a valid hex code",
-		transform: (c) => { c = tc(c); return c.toHex() }
+		transform: (c: string | Instance) => { c = tc(c); return c.toHex() }
 	},
 	created: {
-		init: (d) => new Date(d)
+		init: (d: Date | string) => new Date(d)
 	},
 	privacy: {
-		transform: (o) => validatePrivacy(pKeys, o)
+		transform: (o: Partial<SystemPrivacy>) => validatePrivacy(pKeys, o)
 	}
 }
 
-export default class System {
-	#api;
-
+export interface ISystem {
 	id: string;
 	uuid: string;
 	name?: string;
@@ -92,16 +92,40 @@ export default class System {
 	banner?: string;
 	color?: string;
 	created: Date | string;
-	privacy: SystemPrivacy;
+	privacy?: SystemPrivacy;
 
 	members?: Map<string, Member>;
 	groups?: Map<string, Group>;
 	fronters?: Switch;
 	switches?: Map<string, Switch>;
 	settings?: Map<string, SystemGuildSettings>;
-	config?: SystemSettings;
+	config?: SystemConfig;
+}
+
+export default class System implements ISystem {
+	[key: string]: any;
+
+	#api: API;
+
+	id: string = '';
+	uuid: string = '';
+	name?: string;
+	description?: string;
+	tag?: string;
+	avatar_url?: string;
+	banner?: string;
+	color?: string;
+	created: Date | string = '';
+	privacy?: SystemPrivacy;
+
+	members?: Map<string, Member>;
+	groups?: Map<string, Group>;
+	fronters?: Switch;
+	switches?: Map<string, Switch>;
+	settings?: Map<string, SystemGuildSettings>;
+	config?: SystemConfig;
 	
-	constructor(api, data: Partial<System>) {
+	constructor(api: API, data: Partial<System>) {
 		this.#api = api;
 		for(var k in data) {
 			if(KEYS[k]) {
@@ -137,7 +161,7 @@ export default class System {
 		return mems;
 	}
 
-	async deleteMember(member?: string, token?: string) {
+	async deleteMember(member: string, token?: string) {
 		await this.#api.deleteMember({member, token});
 		if(this.members) this.members.delete(member);
 		return;
@@ -157,8 +181,8 @@ export default class System {
 	}
 
 	async getGroup(group: string, token?: string) {
-		var grp = await this.#api.getGroups({system: this.id, group, token});
-		if(!this.groups) this.groups = new Map();
+		var grp = await this.#api.getGroup({system: this.id, group, token});
+		if(!this.groups) this.groups = new Map<string, Group>();
 		this.groups.set(grp.id, grp)
 		return grp;
 	}
@@ -185,14 +209,14 @@ export default class System {
 		return fronters;
 	}
 
-	async deleteSwitch(switchid?: string, token?: string) {
+	async deleteSwitch(switchid: string, token?: string) {
 		await this.#api.deleteSwitch({switch: switchid, token});
 		if(this.switches) this.switches.delete(switchid);
 		return;
 	}
 
-	async getSettings(token?: string) {
-		var settings = await this.#api.getSystemSettings({token});
+	async getConfig(token?: string) {
+		var settings = await this.#api.getSystemConfig({token});
 		this.config = settings;
 		return settings;
 	}
@@ -205,7 +229,7 @@ export default class System {
 	}
 
 	async verify() {
-		var sys = {};
+		var sys: Partial<System> = {};
 		var errors = [];
 		for(var k in KEYS) {
 			var test = true;

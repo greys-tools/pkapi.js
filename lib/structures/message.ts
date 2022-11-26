@@ -1,24 +1,25 @@
+import API from '../index';
+
 import Member from "./member";
 import System from "./system";
 
-const KEYS = {
+const KEYS: any = {
 	timestamp: {
-		init: (t) => new Date(t)
+		init: (t: Date | string) => new Date(t)
 	},
 	id: { },
 	original: { },
 	sender: { },
 	channel: { },
 	system: {
-		init: (s, api) => s ? new System(api, s) : null
+		init: (s: Partial<System>, api: API) => s ? new System(api, s) : null
 	},
 	member: {
-		init: (m, api) => m ? new Member(api, m) : null
+		init: (m: Partial<Member>, api: API) => m ? new Member(api, m) : null
 	}
 }
-export default class Message {
-	#api;
 
+export interface IMessage {
 	timestamp: Date | string;
 	id: string;
 	original?: string;
@@ -26,8 +27,22 @@ export default class Message {
 	channel: string;
 	system?: string | System;
 	member?: string | Member;
-	
-	constructor(api, data: Partial<Message>) {
+}
+
+export default class Message implements IMessage {
+	[key: string]: any;
+
+	#api: API;
+
+	timestamp: Date | string = '';
+	id: string = '';
+	original?: string;
+	sender: string = '';
+	channel: string = '';
+	system?: string | System;
+	member?: string | Member;
+
+	constructor(api: API, data: Partial<Message>) {
 		this.#api = api;
 		for(var k in data) {
 			if(KEYS[k]) {

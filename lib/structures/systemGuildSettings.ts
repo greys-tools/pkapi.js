@@ -33,12 +33,22 @@ const KEYS: any = {
 	}
 }
 
-export default class SystemGuildSettings {
+export interface ISystemGuildSettings {
 	[key: string]: any;
-	
-	#api;
 
-	guild: string = '';
+	guild: string;
+	proxying_enabled?: boolean;
+	autoproxy_mode?: AutoProxyModes;
+	tag?: string;
+	tag_enabled?: boolean;
+}
+
+export default class SystemGuildSettings implements ISystemGuildSettings {
+	[key: string]: any;
+
+	#api: API;
+	
+	guild = '';
 	proxying_enabled?: boolean;
 	autoproxy_mode?: AutoProxyModes;
 	tag?: string;

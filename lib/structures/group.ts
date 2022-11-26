@@ -1,7 +1,10 @@
+import API from '../index';
+
 import axios from 'axios';
+import tc, { Instance } from 'tinycolor2';
 import validUrl from 'valid-url';
 import { validatePrivacy } from '../utils';
-import Member from './Member';
+import Member from './member';
 
 export const enum GroupPrivacyKeys {
 	Description = 'description_privacy',
@@ -24,23 +27,23 @@ export interface GroupPrivacy {
 	visibility?: string;
 }
 
-const KEYS = {
+const KEYS: any = {
 	id: { },
 	uuid: { },
 	name: {
-		test: (n) => !n.length || n.length <= 100,
+		test: (n: string) => !n.length || n.length <= 100,
 		err: "Name must be 100 characters or less"
 	},
 	display_name: {
-		test: (n) => !n.length || n.length <= 100,
+		test: (n: string) => !n.length || n.length <= 100,
 		err: "Display name must be 100 characters or less"
 	},
 	description: {
-		test: (d) => !d.length || d.length < 1000,
+		test: (d: string) => !d.length || d.length < 1000,
 		err: "Description must be 1000 characters or less"
 	},
 	icon: {
-		test: async (a) => {
+		test: async (a: string) => {
 			if(!validUrl.isWebUri(a)) return false;
 			try {
 				var data = await axios.head(a);
@@ -51,7 +54,7 @@ const KEYS = {
 		err: "Icon URL must be a valid image and less than 256 characters"
 	},
 	banner: {
-		test: async (a) => {
+		test: async (a: string) => {
 			if(a.length > 256) return false;
 			if(!validUrl.isWebUri(a)) return false;
 			try {
@@ -63,35 +66,52 @@ const KEYS = {
 		err: "Banner URL must be a valid image and less than 256 characters"
 	},
 	color: {
-		test: (c) => { c = tc(c); return c.isValid() },
+		test: (c: string | Instance) => { c = tc(c); return c.isValid() },
 		err: "Color must be a valid hex code",
-		transform: (c) => { c = tc(c); return c.toHex() }
+		transform: (c: string | Instance) => { c = tc(c); return c.toHex() }
 	},
 	created: {
-		init: (d) => new Date(d)
+		init: (d: string | Date) => new Date(d)
 	},
 	privacy: {
-		transform: (o) => validatePrivacy(pKeys, o)
+		transform: (o: any) => validatePrivacy(pKeys, o)
 	}
 }
 
-export default class Group {
-	#api;
-
+export interface IGroup {
 	id: string;
 	uuid: string;
 	name: string;
-	display_name: string;
-	description: string;
-	icon: string;
-	banner: string;
-	color: string | Object;
+	display_name?: string;
+	description?: string;
+	icon?: string;
+	banner?: string;
+	color?: string | Object;
 	created: Date | string;
 	privacy: GroupPrivacy;
 
 	members?: Map<string, Member>;
+}
+
+export default class Group implements IGroup {
+	[key: string]: any;
+
+	#api: API;
+
+	id: string = '';
+	uuid: string = '';
+	name: string = '';
+	display_name?: string;
+	description?: string;
+	icon?: string;
+	banner?: string;
+	color?: string | Object;
+	created: Date | string = '';
+	privacy: GroupPrivacy = {};
+
+	members?: Map<string, Member>;
 	
-	constructor(api, data: Partial<Group>) {
+	constructor(api: API, data: Partial<Group>) {
 		this.#api = api;
 		for(var k in data) {
 			if(KEYS[k]) {
@@ -139,7 +159,7 @@ export default class Group {
 	}
 
 	async verify() {
-		var group = {};
+		var group: Partial<Group> = {};
 		var errors = [];
 		for(var k in KEYS) {
 			var test = true;

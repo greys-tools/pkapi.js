@@ -1,5 +1,14 @@
+import API from '../index';
+
 export default class APIError {
-	constructor(api, data: any = {}) {
+	api: any;
+	status?: string;
+	code?: string;
+	message?: string;
+	statusText?: string;
+	headers?: any;
+
+	constructor(api: API, data: any = {}) {
 		this.api = {
 			baseURL: api.base_url,
 			token: api.token,

@@ -1,6 +1,8 @@
+import API from '../index';
+
 import { rawTimeZones } from '@vvo/tzdb';
 
-function findTz(t) {
+function findTz(t: string) {
 	var raw = rawTimeZones.find(z => {
 		return ([
 			z.name.toLowerCase(),
@@ -12,33 +14,45 @@ function findTz(t) {
 	return raw;
 }
 
-const KEYS = {
+const KEYS: any = {
 	timezone: {
-		test: (t) => findTz(t),
+		test: (t: string) => findTz(t),
 		err: "Timezone must be valid",
-		transform: (t) => {
+		transform: (t: string) => {
 			var raw = findTz(t)
-			return raw.abbreviation.replace('GMT','UTC');
+			return raw!.abbreviation.replace('GMT','UTC');
 		}
 	},
 	pings_enabled: {
-		transform: (v) => v ? true : false
+		transform: (v?: any) => v ? true : false
 	},
 	latch_timeout: {
-		test: (v) => !isNaN(v)
+		test: (v?: any) => !isNaN(v)
 	},
 	member_default_private: {
-		transform: (v) => v ? true : false
+		transform: (v?: any) => v ? true : false
 	},
 	group_default_private: {
-		transform: (v) => v ? true : false
+		transform: (v?: any) => v ? true : false
 	},
 	member_limit: { },
 	group_limit: { }
 }
 
-export default class SystemConfig {
-	#api;
+export interface ISystemConfig {
+	timezone?: string;
+	pings_enabled?: boolean;
+	latch_timeout?: number;
+	member_default_private?: boolean;
+	group_default_private?: boolean;
+	member_limit?: number;
+	group_limit?: number;
+}
+
+export default class SystemConfig implements ISystemConfig {
+	[key: string]: any;
+
+	#api: API;
 
 	timezone?: string;
 	pings_enabled?: boolean;
@@ -48,7 +62,7 @@ export default class SystemConfig {
 	member_limit?: number;
 	group_limit?: number;
 
-	constructor(api, data: Partial<SystemConfig> = { }) {
+	constructor(api: API, data: Partial<SystemConfig> = { }) {
 		this.#api = api;
 		for(var k in data) {
 			if(KEYS[k]) {
@@ -65,7 +79,7 @@ export default class SystemConfig {
 	}
 
 	async verify() {
-		var config = {};
+		var config: Partial<SystemConfig> = {};
 		var errors = [];
 		for(var k in KEYS) {
 			var test = true;

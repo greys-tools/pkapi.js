@@ -1,28 +1,41 @@
+import API from '../index';
+
 import Member from "./member";
 
-const KEYS = {
+const KEYS: any = {
 	id: { },
 	timestamp: {
-		init: (t) => new Date(t),
+		init: (t: Date | string) => new Date(t),
 		// transform: (d) => d.toISOString()
 	},
 	members: {
 		transform: (mems: Map<string, Member> | Array<string>) => {
 			var arr = [];
-			if(mems.values) for(var m of mems.values()) arr.push(m.id ?? m);
-			else arr = mems.map(m => m.id ?? m);
+			if(mems instanceof Map) for(var m of mems.values()) arr.push(m.id ?? m);
+			else arr = mems.map((m: Member | string) => {
+				return m instanceof Member ? m.id : m;
+			});
 			return arr;
 		}
 	}
 }
-export default class Switch {
-	#api;
 
+export interface ISwitch {
 	id: string;
 	timestamp: Date | string;
 	members?: Map<string, Member> | Array<string>;
+}
+
+export default class Switch implements ISwitch {
+	[key: string]: any;
+
+	#api;
+
+	id: string = '';
+	timestamp: Date | string = '';
+	members?: Map<string, Member> | Array<string>;
 	
-	constructor(api, data: Partial<Switch>) {
+	constructor(api: API, data: Partial<Switch>) {
 		this.#api = api;
 		if(!data.timestamp || !data.members)
 			throw new Error("Switch objects require a timestamp and members key");
@@ -52,7 +65,7 @@ export default class Switch {
 	}
 
 	async verify() {
-		var sw = {};
+		var sw: Partial<Switch> = {};
 		var errors = [];
 		for(var k in KEYS) {
 			if(this[k] == null) {
