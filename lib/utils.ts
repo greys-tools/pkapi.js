@@ -1,5 +1,5 @@
 export function validatePrivacy(keys: Array<string>, obj: any) {
-	var priv = {}
+	var priv: any = {}
 	for(var k of keys) {
 		if(obj[k] == null) continue;
 		if(['private', 'public'].includes(obj[k])) continue;
@@ -10,10 +10,10 @@ export function validatePrivacy(keys: Array<string>, obj: any) {
 	return priv;
 }
 
-export function formatDate(d: Date) {
-	var y = ('000' + d.getFullYear()).slice(-4);
-	var m = ("0" + (d.getMonth() + 1)).slice(-2);
-	var d = ("0" + (d.getDate())).slice(-2);
+export function formatDate(D: Date) {
+	var y = ('000' + D.getFullYear()).slice(-4);
+	var m = ("0" + (D.getMonth() + 1)).slice(-2);
+	var d = ("0" + (D.getDate())).slice(-2);
 
 	return `${y}-${m}-${d}`;
 }

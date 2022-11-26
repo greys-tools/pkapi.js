@@ -1,46 +1,50 @@
-export const enum AutoProxyModes {
+import API from '../index';
+
+export enum AutoProxyModes {
 	Off = 'off',
 	Front = 'front',
 	Latch = 'latch',
 	Member = 'member'
 }
 
-const apVals = [
-	AutoProxyValues.Off,
-	AutoProxyValues.Front,
-	AutoProxyValues.Latch,
-	AutoProxyValues.Member
+const apVals: string[] = [
+	AutoProxyModes.Off,
+	AutoProxyModes.Front,
+	AutoProxyModes.Latch,
+	AutoProxyModes.Member
 ]
 
-const KEYS = {
+const KEYS: any = {
 	guild: { },
 	proxying_enabled: {
-		transform: (v) => v ? true : false
+		transform: (v?: any) => v ? true : false
 	},
 	autoproxy_mode: {
-		test: (s) => apVals.includes(s),
+		test: (s?: string) => s && apVals.includes(s),
 		err: `Valid autoproxy mode values: ${apVals.join(", ")}`
 	},
 	autoproxy_member: { },
 	tag: {
-		test: (s) => s.length <= 79,
+		test: (s?: string) => s!.length <= 79,
 		err: 'Server tag must be 79 characters or less'
 	},
 	tag_enabled: {
-		transform: (v) => v ? true : false
+		transform: (v?: any) => v ? true : false
 	}
 }
 
 export default class SystemGuildSettings {
+	[key: string]: any;
+	
 	#api;
 
-	guild: string;
+	guild: string = '';
 	proxying_enabled?: boolean;
-	autoproxy_mode?: AutoProxyValues;
+	autoproxy_mode?: AutoProxyModes;
 	tag?: string;
 	tag_enabled?: boolean;
 
-	constructor(api, data = { }) {
+	constructor(api: API, data: Partial<SystemGuildSettings> = { }) {
 		this.#api = api;
 		for(var k in data) {
 			if(KEYS[k]) {
@@ -57,7 +61,7 @@ export default class SystemGuildSettings {
 	}
 
 	async verify() {
-		var settings = {};
+		var settings: Partial<SystemGuildSettings> = {};
 		var errors = [];
 		for(var k in KEYS) {
 			var test = true;

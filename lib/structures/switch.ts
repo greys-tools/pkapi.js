@@ -7,7 +7,7 @@ const KEYS = {
 		// transform: (d) => d.toISOString()
 	},
 	members: {
-		transform: (mems) => {
+		transform: (mems: Map<string, Member> | Array<string>) => {
 			var arr = [];
 			if(mems.values) for(var m of mems.values()) arr.push(m.id ?? m);
 			else arr = mems.map(m => m.id ?? m);
@@ -20,7 +20,7 @@ export default class Switch {
 
 	id: string;
 	timestamp: Date | string;
-	members?: Map<Member> | Array<string>;
+	members?: Map<string, Member> | Array<string>;
 	
 	constructor(api, data: Partial<Switch>) {
 		this.#api = api;
