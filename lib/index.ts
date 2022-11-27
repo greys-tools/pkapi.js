@@ -601,10 +601,18 @@ class PKAPI {
 		var token = this.#token || data.token;
 		if(!token) throw new Error("POST requires a token.");
 
-		var body = {members: []};
+		var body: {
+			members: string[]
+		} = {
+			members: []
+		};
+
 		if(data.members) {
-			for(var m of data.members)
-				body.members.push(m.id ?? m);
+			if(Array.isArray(data.members)) {
+				body.members = data.members;	
+			} else {
+				body.members = Object.values(data.members).map((m: IMember) => m.id);
+			}
 		}
 		try {
 			var resp = await this.handle(ROUTES[this.#_version].ADD_SWITCH(), {token, body})
@@ -629,24 +637,27 @@ class PKAPI {
 		var token = this.#token || data.token;
 		try {
 			var resp = await this.handle(ROUTES[this.#_version].GET_SWITCHES(system), {token});
-			if(!data.raw) var membs = await this.handle(ROUTES[this.#_version].GET_MEMBERS(system), {token})
+			if(!data.raw) {
+				var memb_resp = await this.handle(ROUTES[this.#_version].GET_MEMBERS(system), {token});
+				var membs = new Map(memb_resp.data.map((m: IMember) => [m.id, new Member(this, m)]));
+				var switches = [];
+				for(var s of resp.data) {
+					var members = new Map();
+					for(var m of s.members) if(membs.get(m)) members.set(m, membs.get(m));
+					s.members = members;
+					switches.push(new Switch(this, s));
+				}
+			}
 		} catch(e) {
 			throw e;
 		}
 
-		if(!data.raw) {
-			membs = new Map(membs.data.map(m => [m.id, new Member(this, m)]));
-			var switches = [];
-			for(var s of resp.data) {
-				var members = new Map();
-				for(var m of s.members) if(membs.get(m)) members.set(m, membs.get(m));
-				s.members = members;
-				switches.push(new Switch(this, s));
-			}
-		} else switches = resp.data.map(s => new Switch(this, s));
+		if(data.raw) {
+			switches = resp.data.map((s: ISwitch) => new Switch(this, s));
+		}
 
 		if(this.#_version < 2) return switches;
-		else return new Map(switches.map(s => [s.id, s]));
+		else return new Map(switches.map((s: ISwitch) => [s.id, s]));
 	}
 
 	async getSwitch(data: {
@@ -668,11 +679,14 @@ class PKAPI {
 
 		return new Switch(this, {
 			...resp.data,
-			members: new Map(resp.data.members.map(m => [m.id, new Member(this, m)]))
+			members: new Map(resp.data.members.map((m: IMember) => [m.id, new Member(this, m)]))
 		});
 	}
 
-	async getFronters(data = {}) {
+	async getFronters(data: {
+		token?: string,
+		system?: string
+	}) {
 		var token = this.#token || data.token;
 		var system = data.system ?? '@me';
 		try {
@@ -683,11 +697,15 @@ class PKAPI {
 
 		return new Switch(this, {
 			...resp.data,
-			members: new Map(resp.data.members.map(m => [m.id, new Member(this, m)]))
+			members: new Map(resp.data.members.map((m: IMember) => [m.id, new Member(this, m)]))
 		});
 	}
 
-	async patchSwitchTimestamp(data = {}) {
+	async patchSwitchTimestamp(data: {
+		token?: string,
+		switch: string,
+		timestamp: string | Date
+	}) {
 		if(this.version < 2) throw new Error("Individual switches are only available for API version 2.");
 
 		var token = this.#token || data.token;
@@ -706,11 +724,15 @@ class PKAPI {
 
 		return new Switch(this, {
 			...sw.data,
-			members: new Map(sw.data.members.map(m => [m.id, new Member(this, m)]))
+			members: new Map(sw.data.members.map((m: IMember) => [m.id, new Member(this, m)]))
 		});
 	}
 
-	async patchSwitchMembers(data = {}) {
+	async patchSwitchMembers(data: {
+		token?: string,
+		switch: string,
+		members?: string[]
+	}) {
 		if(this.version < 2) throw new Error("Individual switches are only available for API version 2.");
 
 		var token = this.#token || data.token;
@@ -719,13 +741,13 @@ class PKAPI {
 
 		try {
 			var s = data instanceof Switch ? data : new Switch(this, data);
-			s = await s.verify();
-			if(s.members && !Array.isArray(s.members))
+			var sv = await s.verify();
+			if(sv.members && !Array.isArray(sv.members))
 				throw new Error('Members must be an array or map if provided.');
 
 			var sw = await this.handle(ROUTES[this.#_version].PATCH_SWITCH_MEMBERS(data.switch), {
 				token,
-				body: s.members ?? []
+				body: sv.members ?? []
 			});
 		} catch(e) {
 			throw e;
@@ -733,11 +755,14 @@ class PKAPI {
 
 		return new Switch(this, {
 			...sw.data,
-			members: new Map(sw.data.members.map(m => [m.id, new Member(this, m)]))
+			members: new Map(sw.data.members.map((m: IMember) => [m.id, new Member(this, m)]))
 		});
 	}
 
-	async deleteSwitch(data = {}) {
+	async deleteSwitch(data: {
+		token?: string,
+		switch: string
+	}) {
 		if(this.version < 2) throw new Error("Individual switches are only available for API version 2.");
 
 		var token = this.#token || data.token;
@@ -757,7 +782,10 @@ class PKAPI {
 	** 			MISC FUNCTIONS
 	*/
 
-	async getMessage(data = {}) {
+	async getMessage(data: {
+		token?: string,
+		message: string
+	}) {
 		if(data.message == null) throw new Error('Must provide a message ID.');
 		var token = this.#token || data.token;
 		try {
@@ -773,14 +801,22 @@ class PKAPI {
 	**			BASE STUFF
 	*/
 
-	async handle(path, options = {}) {
+	async handle(path: any, options?: {
+		token?: string,
+		headers?: any,
+		body?: any
+	}) {
 		var { route, method } = path;
-		var headers = options.headers || {};
-		var request = {method, headers};
-		var token = this.#token || options.token;
+		var headers = options?.headers || {};
+		var request: {
+			method?: any,
+			headers?: any,
+			data?: any
+		} = {method, headers};
+		var token = this.#token || options?.token;
 		if(token) request.headers["Authorization"] = token;
 
-		if(options.body) {
+		if(options?.body) {
 			request.headers["content-type"] = "application/json";
 	        request.data = JSON.stringify(options.body);
 		}
@@ -797,7 +833,7 @@ class PKAPI {
 			
 		try {
 			var resp = await this.#inst(route, request);
-		} catch(e) {
+		} catch(e: any) {
 			console.log(e)
 			throw new APIError(this, e.response);
 		}
@@ -833,3 +869,30 @@ class PKAPI {
 }
 
 export default PKAPI;
+export {
+	APIError,
+
+	Group,
+	IGroup,
+
+	Member,
+	IMember,
+
+	System,
+	ISystem,
+
+	Switch,
+	ISwitch,
+
+	Message,
+	IMessage,
+
+	MemberGuildSettings,
+	IMemberGuildSettings,
+
+	SystemConfig,
+	ISystemConfig,
+
+	SystemGuildSettings,
+	ISystemGuildSettings,
+}
