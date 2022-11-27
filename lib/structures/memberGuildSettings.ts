@@ -5,6 +5,7 @@ import validUrl from 'valid-url';
 
 const KEYS: any = {
 	guild: { },
+	member: { },
 	display_name: {
 		test: (s: string) => s.length <= 100,
 		err: 'Display name must be 100 characters or less'
@@ -26,6 +27,7 @@ export interface IMemberGuildSettings {
 	[key: string]: any;
 
 	guild: string;
+	member: string;
 	display_name?: string;
 	avatar_url?: string;
 }
@@ -35,6 +37,9 @@ export default class MemberGuildSettings implements IMemberGuildSettings {
 
 	#api: API;
 	guild = '';
+	member = '';
+	display_name?: string;
+	avatar_url?: string;
 
 	constructor(api: API, data: Partial<MemberGuildSettings>) {
 		this.#api = api;

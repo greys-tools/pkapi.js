@@ -181,7 +181,7 @@ export default class System implements ISystem {
 	}
 
 	async getGroup(group: string, token?: string) {
-		var grp = await this.#api.getGroup({system: this.id, group, token});
+		var grp = await this.#api.getGroup({group, token});
 		if(!this.groups) this.groups = new Map<string, Group>();
 		this.groups.set(grp.id, grp)
 		return grp;

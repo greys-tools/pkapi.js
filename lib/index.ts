@@ -188,7 +188,7 @@ class PKAPI {
 	**			MEMBER FUNCTIONS
 	*/
 
-	async createMember(data: RequestData<IMember>) {
+	async createMember(data: RequestData<Partial<IMember>>) {
 		var token = this.#token || data.token;
 		if(!token) throw new Error("POST requires a token.");
 
@@ -224,11 +224,11 @@ class PKAPI {
 			throw e;
 		}
 
-		var mems = resp.data.map(m => [m.id, new Member(this, m)]);
+		var mems = resp.data.map((m: IMember) => [m.id, new Member(this, m)]);
 		return new Map<string, Member>(mems);
 	}
 
-	async patchMember(data: RequestData<IMember>) {
+	async patchMember(data: RequestData<Partial<IMember> & { member: string }>) {
 		if(data.member == null) throw new Error("Must provide a member ID.");
 		var token = this.#token || data.token;
 		if(!token) throw new Error("PATCH requires a token.");
@@ -272,7 +272,7 @@ class PKAPI {
 			throw e;
 		}
 
-		var groups = resp.data.map(g => [g.id, new Group(this, g)]);
+		var groups = resp.data.map((g: IGroup) => [g.id, new Group(this, g)]);
 		return new Map<string, Group>(groups);
 	}
 
@@ -289,7 +289,7 @@ class PKAPI {
 		if(!data.groups || !Array.isArray(data.groups))
 			throw new Error('Must provide an array of groups.');
 		var groups = data.groups;
-		if(groups.find(g => g instanceof Group)) groups = groups.map(g => g.id ?? g);
+		groups = groups.map(g => g instanceof Group ? g.id : g);
 
 		try {
 			var resp = await this.handle(
@@ -316,7 +316,7 @@ class PKAPI {
 		if(!data.groups || !Array.isArray(data.groups))
 			throw new Error('Must provide an array of groups.');
 		var groups = data.groups;
-		if(groups.find(g => g instanceof Group)) groups = groups.map(g => g.id ?? g);
+		groups = groups.map(g => g instanceof Group ? g.id : g);
 
 		try {
 			var resp = await this.handle(
@@ -343,7 +343,7 @@ class PKAPI {
 		if(!data.groups || !Array.isArray(data.groups))
 			throw new Error('Must provide an array of groups.');
 		var groups = data.groups;
-		if(groups.find(g => g instanceof Group)) groups = groups.map(g => g.id ?? g);
+		groups = groups.map(g => g instanceof Group ? g.id : g);
 
 		try {
 			var resp = await this.handle(
@@ -378,10 +378,10 @@ class PKAPI {
 			throw e;
 		}
 
-		return new MemberGuildSettings(this, {...resp.data, guild: data.guild});
+		return new MemberGuildSettings(this, {...resp.data, guild: data.guild, member: data.member});
 	}
 
-	async patchMemberGuildSettings(data: RequestData<IMemberGuildSettings>) {
+	async patchMemberGuildSettings(data: RequestData<Partial<IMemberGuildSettings>>) {
 		if(this.version < 2) throw new Error("Guild settings are only available for API version 2.");
 
 		var token = this.#token || data.token;
@@ -400,14 +400,14 @@ class PKAPI {
 			throw e;
 		}
 
-		return new MemberGuildSettings(this, {...resp.data, guild: data.guild});
+		return new MemberGuildSettings(this, {...resp.data, guild: data.guild, member: data.member});
 	}
 
 	/*
 	**			GROUP FUNCTIONS
 	*/
 
-	async createGroup(data = {}) {
+	async createGroup(data: RequestData<Partial<IGroup>>) {
 		if(this.version < 2) throw new Error("Groups are only available for API version 2.");
 
 		var token = this.#token || data.token;
@@ -424,7 +424,7 @@ class PKAPI {
 		return new Group(this, resp.data);
 	}
 
-	async getGroups(data = {}) {
+	async getGroups(data: { token?: string, system?: string }) {
 		if(this.version < 2) throw new Error("Groups are only available for API version 2.");
 
 		var token = this.#token || data.token;
@@ -436,11 +436,15 @@ class PKAPI {
 			throw e;
 		}
 
-		var groups = resp.data.map(g => [g.id, new Group(this, g)]);
+		var groups = resp.data.map((g: IGroup) => [g.id, new Group(this, g)]);
 		return new Map<string, Group>(groups);
 	}
 
-	async getGroup(data = {}) {
+	async getGroup(data: {
+		token?: string,
+		group: string,
+		fetch_members?: boolean
+	}) {
 		if(this.version < 2) throw new Error("Groups are only available for API version 2.");
 
 		var token = this.#token || data.token;
@@ -458,7 +462,7 @@ class PKAPI {
 		return group;
 	}
 
-	async patchGroup(data = {}) {
+	async patchGroup(data: RequestData<Partial<IGroup> & { group: string }>) {
 		if(this.version < 2) throw new Error("Groups are only available for API version 2.");
 
 		if(data.group == null) throw new Error("Must provide a group ID.");
@@ -468,15 +472,15 @@ class PKAPI {
 		try {
 			var group = data instanceof Group ? data : new Group(this, data);
 			var body = await group.verify();
-			group = await this.handle(ROUTES[this.#_version].PATCH_GROUP(data.group), {token, body});
+			var resp = await this.handle(ROUTES[this.#_version].PATCH_GROUP(data.group), {token, body});
 		} catch(e) {
 			throw e;
 		}
 
-		return new Group(this, group.data);
+		return new Group(this, resp.data);
 	}
 
-	async deleteGroup(data = {}) {
+	async deleteGroup(data: { token?: string, group: string }) {
 		if(this.version < 2) throw new Error("Groups are only available for API version 2.");
 		
 		if(data.group == null) throw new Error("Must provide a group ID.");
@@ -492,7 +496,7 @@ class PKAPI {
 		return;
 	}
 
-	async getGroupMembers(data = {}) {
+	async getGroupMembers(data: { token?: string, group: string }) {
 		if(this.version < 2) throw new Error("Groups are only available for API version 2.");
 
 		var token = this.#token || data.token;
@@ -504,11 +508,15 @@ class PKAPI {
 			throw e;
 		}
 
-		var mems = resp.data.map(m => [m.id, new Member(this, m)]);
+		var mems = resp.data.map((m: IMember) => [m.id, new Member(this, m)]);
 		return new Map<string, Member>(mems);
 	}
 
-	async addGroupMembers(data = {}) {
+	async addGroupMembers(data: {
+		token?: string,
+		group: string,
+		members: string[] | Member[]
+	}) {
 		if(this.version < 2) throw new Error("Groups are only available for API version 2.");
 
 		var token = this.#token || data.token;
@@ -517,7 +525,7 @@ class PKAPI {
 		if(!data.members || !Array.isArray(data.members))
 			throw new Error('Must provide an array of members.');
 		var members = data.members;
-		if(members.find(g => g instanceof Member)) members = members.map(m => m.id ?? m);
+		members = members.map(m => m instanceof Member ? m.id : m);
 
 		try {
 			var resp = await this.handle(
@@ -531,7 +539,11 @@ class PKAPI {
 		return;
 	}
 
-	async removeGroupMembers(data = {}) {
+	async removeGroupMembers(data: {
+		token?: string,
+		group: string,
+		members: string[] | Member[]
+	}) {
 		if(this.version < 2) throw new Error("Groups are only available for API version 2.");
 
 		var token = this.#token || data.token;
@@ -540,7 +552,7 @@ class PKAPI {
 		if(!data.members || !Array.isArray(data.members))
 			throw new Error('Must provide an array of members.');
 		var members = data.members;
-		if(members.find(g => g instanceof Member)) members = members.map(m => m.id ?? m);
+		members = members.map(m => m instanceof Member ? m.id : m);
 
 		try {
 			var resp = await this.handle(
@@ -554,7 +566,11 @@ class PKAPI {
 		return;
 	}
 
-	async setGroupMembers(data = {}) {
+	async setGroupMembers(data: {
+		token?: string,
+		group: string,
+		members: string[] | Member[]
+	}) {
 		if(this.version < 2) throw new Error("Groups are only available for API version 2.");
 
 		var token = this.#token || data.token;
@@ -563,7 +579,7 @@ class PKAPI {
 		if(!data.members || !Array.isArray(data.members))
 			throw new Error('Must provide an array of members.');
 		var members = data.members;
-		if(members.find(g => g instanceof Member)) members = members.map(m => m.id ?? m);
+		members = members.map(m => m instanceof Member ? m.id : m);
 
 		try {
 			var resp = await this.handle(
@@ -581,7 +597,7 @@ class PKAPI {
 	**			SWITCH FUNCTIONS
 	*/
 
-	async createSwitch(data = {}) {
+	async createSwitch(data: RequestData<Partial<ISwitch>>) {
 		var token = this.#token || data.token;
 		if(!token) throw new Error("POST requires a token.");
 
@@ -600,11 +616,15 @@ class PKAPI {
 
 		return new Switch(this, {
 			...resp.data,
-			members: new Map(resp.data.members.map(m => [m.id, new Member(this, m)]))
+			members: new Map(resp.data.members.map((m: IMember) => [m.id, new Member(this, m)]))
 		});
 	}
 
-	async getSwitches(data = {}) {
+	async getSwitches(data: {
+		token?: string,
+		system?: string,
+		raw?: boolean
+	}) {
 		var system = data.system ?? '@me';
 		var token = this.#token || data.token;
 		try {
@@ -629,7 +649,11 @@ class PKAPI {
 		else return new Map(switches.map(s => [s.id, s]));
 	}
 
-	async getSwitch(data = {}) {
+	async getSwitch(data: {
+		token?: string,
+		system?: string,
+		switch: string
+	}) {
 		if(this.version < 2) throw new Error("Individual switches are only available for API version 2.");
 
 		var token = this.#token || data.token;
