@@ -255,13 +255,16 @@ export default class Member implements IMember {
 		var mem: Partial<Member> = {};
 		var errors = [];
 		for(var k in KEYS) {
-			if(!KEYS[k].required) {
-				if(this[k] == null) {
-					mem[k] = this[k];
-					continue;
-				}
-				if(this[k] == undefined) continue;
+			if(KEYS[k].required && !this[k]) {
+				errors.push(`Key ${k} is required, but wasn't supplied`);
+				continue;
 			}
+			
+			if(this[k] == null) {
+				mem[k] = this[k];
+				continue;
+			}
+			if(this[k] == undefined) continue;
 
 			var test = true;
 			if(KEYS[k].test) test = await KEYS[k].test(this[k]);

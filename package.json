@@ -1,6 +1,6 @@
 {
   "name": "pkapi.js",
-  "version": "4.0.1",
+  "version": "5.0.0",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.mjs",
   "exports": {

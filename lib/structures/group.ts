@@ -32,7 +32,8 @@ const KEYS: any = {
 	uuid: { },
 	name: {
 		test: (n: string) => !n.length || n.length <= 100,
-		err: "Name must be 100 characters or less"
+		err: "Name must be 100 characters or less",
+		required: true
 	},
 	display_name: {
 		test: (n: string) => !n.length || n.length <= 100,
@@ -162,13 +163,18 @@ export default class Group implements IGroup {
 		var group: Partial<Group> = {};
 		var errors = [];
 		for(var k in KEYS) {
-			var test = true;
+			if(KEYS[k].required && !this[k]) {
+				errors.push(`Key ${k} is required, but wasn't supplied`);
+				continue;
+			}
+			
 			if(this[k] == null) {
 				group[k] = this[k];
 				continue;
 			}
 			if(this[k] == undefined) continue;
-			
+
+			var test = true;
 			if(KEYS[k].test) test = await KEYS[k].test(this[k]);
 			if(!test) {
 				errors.push(KEYS[k].err);
