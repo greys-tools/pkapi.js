@@ -1,5 +1,5 @@
 # pkapi.js
-*A PluralKit API wrapper for JavaScript*
+*A PluralKit API wrapper for NodeJS, written in TypeScript*
 
 ## About
 [PluralKit](https://github.com/PluralKit/PluralKit) is an 
