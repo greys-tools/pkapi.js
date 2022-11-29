@@ -67,11 +67,8 @@ const KEYS: any = {
 	uuid: { },
 	system: { },
 	name: {
-		test: (n: string) => {
-			console.log(n);
-			return n != undefined && (n.length && n.length <= 100);
-		},
-		err: "Name must be present and 100 characters or less",
+		test: (n: string) => n.length && n.length <= 100,
+		err: "Name must be 100 characters or less",
 		required: true
 	},
 	display_name: {

@@ -31,7 +31,7 @@ const KEYS: any = {
 	id: { },
 	uuid: { },
 	name: {
-		test: (n: string) => !n.length || n.length <= 100,
+		test: (n: string) => n.length && n.length <= 100,
 		err: "Name must be 100 characters or less",
 		required: true
 	},
