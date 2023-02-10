@@ -17,6 +17,7 @@ export interface APIData {
 	base_url?: string;
 	version?: number;
 	token?: string;
+	userAgent?: string;
 }
 
 export interface RequestOptions {
@@ -46,6 +47,7 @@ class PKAPI {
 	#inst;
 	#_base: string = 'https://api.pluralkit.me';
 	#_version: number = 2;
+	#userAgent: string = 'PKAPI.js/5.x';
 
 	#version_warning = false;
 	
@@ -53,10 +55,14 @@ class PKAPI {
 		this.#_base = (data?.base_url ?? 'https://api.pluralkit.me');
 		this.#_version = (data?.version ?? 2);
 		this.#token = data?.token;
+		this.#userAgent = (data?.userAgent ?? 'PKAPI.js/5.x');
 
 		this.#inst = axios.create({
 			validateStatus: (s) => s < 300 && s > 100,
-			baseURL: `${this.#_base}/v${this.#_version}`
+			baseURL: `${this.#_base}/v${this.#_version}`,
+			headers: {
+				'User-Agent': this.#userAgent 
+			}
 		})
 	}
 
@@ -865,6 +871,15 @@ class PKAPI {
 
 	get token() {
 		return this.#token;
+	}
+
+	get userAgent() {
+		return this.#userAgent;
+	}
+
+	set userAgent(s) {
+		this.#userAgent = s;
+		this.#inst.defaults.headers['User-Agent'] = s;
 	}
 }
 
