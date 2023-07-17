@@ -885,6 +885,8 @@ class PKAPI {
 
 export default PKAPI;
 export {
+	PKAPI,
+	
 	APIError,
 
 	Group,
