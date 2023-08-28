@@ -7,23 +7,29 @@ import { validatePrivacy } from '../utils';
 import Member from './member';
 
 export const enum GroupPrivacyKeys {
-	Description = 'description_privacy',
-	Icon = 'icon_privacy',
-	List = 'list_privacy',
-	Visibility = 'visibility',
+	Name = 			'name_privacy',
+	Description = 	'description_privacy',
+	Icon = 			'icon_privacy',
+	List = 			'list_privacy',
+	Metadata = 		'metadata_privacy',
+	Visibility = 	'visibility',
 }
 
 const pKeys = [
+	GroupPrivacyKeys.Name,
 	GroupPrivacyKeys.Description,
 	GroupPrivacyKeys.Icon,
 	GroupPrivacyKeys.List,
+	GroupPrivacyKeys.Metadata,
 	GroupPrivacyKeys.Visibility
 ]
 
 export interface GroupPrivacy {
+	name_privacy?: string;
 	description_privacy?: string;
 	icon_privacy?: string;
 	list_privacy?: string;
+	metadata_privacy?: string;
 	visibility?: string;
 }
 

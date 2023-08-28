@@ -54,8 +54,13 @@ const ROUTES: any = {
 
 		GET_SYSTEM_CONFIG: () => ({method: 'GET', route: `/systems/@me/settings`}),
 		PATCH_SYSTEM_CONFIG: () => ({method: 'PATCH', route: `/systems/@me/settings`}),
+
 		GET_SYSTEM_GUILD_SETTINGS: (gid: string) => ({method: 'GET', route: `/systems/@me/guilds/${gid}`}),
 		PATCH_SYSTEM_GUILD_SETTINGS: (gid: string) => ({method: 'PATCH', route: `/systems/@me/guilds/${gid}`}),
+
+		GET_SYSTEM_AUTOPROXY_SETTINGS: (gid: string) => ({method: 'GET', route: `/systems/@me/autoproxy?guild_id=${gid}`}),
+		PATCH_SYSTEM_AUTOPROXY_SETTINGS: (gid: string) => ({method: 'PATCH', route: `/systems/@me/autoproxy?guild_id=${gid}`}),
+
 		GET_MEMBER_GUILD_SETTINGS: (mid: string, gid: string) => ({method: 'GET', route: `/members/${mid}/guilds/${gid}`}),
 		PATCH_MEMBER_GUILD_SETTINGS: (mid: string, gid: string) => ({method: 'PATCH', route: `/members/${mid}/guilds/${gid}`}),
 

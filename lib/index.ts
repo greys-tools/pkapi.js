@@ -7,6 +7,7 @@ import Switch, {ISwitch} from './structures/switch';
 import Message, {IMessage} from './structures/message';
 import SystemConfig, {ISystemConfig} from './structures/systemConfig';
 import SystemGuildSettings, {ISystemGuildSettings} from './structures/systemGuildSettings';
+import SystemAutoproxySettings, {ISystemAutoproxySettings} from './structures/systemAutoproxySettings';
 import MemberGuildSettings, {IMemberGuildSettings} from './structures/memberGuildSettings';
 
 import APIError from './structures/apiError';
@@ -153,7 +154,7 @@ class PKAPI {
 		return new SystemConfig(this, resp.data);
 	}
 
-	async getSystemGuildSettings(data: { token?: string, guild: string}) {
+	async getSystemGuildSettings(data: { token?: string, guild: string }) {
 		if(this.version < 2) throw new Error("Guild settings are only available for API version 2.");
 
 		var token = this.#token || data.token;
@@ -188,6 +189,43 @@ class PKAPI {
 		}
 
 		return new SystemGuildSettings(this, {...resp.data, guild: data.guild});
+	}
+
+	async getSystemAutoproxySettings(data: { token?: string, guild: string }) {
+		if(this.version < 2) throw new Error("Autoproxy settings are only available for API version 2.");
+
+		var token = this.#token || data.token;
+		if(!token) throw new Error("Getting autoproxy settings requires a token.");
+		if(!data.guild) throw new Error("Must provide a guild ID.");
+
+		try {
+			var resp = await this.handle(ROUTES[this.#_version].GET_SYSTEM_AUTOPROXY_SETTINGS(data.guild), {token});
+		} catch(e) {
+			throw e;
+		}
+
+		return new SystemAutoproxySettings(this, {...resp.data, guild: data.guild});
+	}
+
+	async patchSystemAutoproxySettings(data: RequestData<ISystemAutoproxySettings>) {
+		if(this.version < 2) throw new Error("Autoproxy settings are only available for API version 2.");
+
+		var token = this.#token || data.token;
+		if(!token) throw new Error("PATCH requires a token.");
+		if(!data.guild) throw new Error("Must provide a guild ID.");
+
+		try {
+			var settings = data instanceof SystemAutoproxySettings ? data : new SystemAutoproxySettings(this, data);
+			var body = await settings.verify();
+			var resp = await this.handle(
+				ROUTES[this.#_version].PATCH_SYSTEM_AUTOPROXY_SETTINGS(data.guild),
+				{token, body}
+			);
+		} catch(e) {
+			throw e;
+		}
+
+		return new SystemAutoproxySettings(this, {...resp.data, guild: data.guild});
 	}
 
 	/*

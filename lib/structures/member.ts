@@ -39,7 +39,8 @@ const enum MemberPrivacyKeys {
 	Birthday = 		'birthday_privacy',
 	Pronouns = 		'pronoun_privacy',
 	Avatar = 		'avatar_privacy',
-	Metadata = 		'metadata_privacy'
+	Metadata = 		'metadata_privacy',
+	Proxy = 		'proxy_privacy'
 }
 
 const pKeys = [
@@ -49,7 +50,8 @@ const pKeys = [
 	MemberPrivacyKeys.Birthday,
 	MemberPrivacyKeys.Pronouns,
 	MemberPrivacyKeys.Avatar,
-	MemberPrivacyKeys.Metadata
+	MemberPrivacyKeys.Metadata,
+	MemberPrivacyKeys.Proxy
 ]
 
 export interface MemberPrivacy {
@@ -60,6 +62,7 @@ export interface MemberPrivacy {
 	pronoun_privacy?: string;
 	avatar_privacy?: string;
 	metadata_privacy?: string;
+	proxy_privacy?: string;
 }
 
 const KEYS: any = {
@@ -75,40 +78,10 @@ const KEYS: any = {
 		test: (d: string) => !d.length || d.length <= 100,
 		err: "Display name must be 100 characters or less"
 	},
-	description: {
-		test: (d: string) => !d.length || d.length < 1000,
-		err: "Description must be 1000 characters or less"
-	},
-	pronouns: {
-		test: (p: string) => !p.length || p.length <= 100,
-		err: "Pronouns must be 100 characters or less"
-	},
 	color: {
 		test: (c: string | Instance) => { c = tc(c); return c.isValid() },
 		err: "Color must be a valid hex code",
 		transform: (c: string | Instance) => { c = tc(c); return c.toHex() }
-	},
-	avatar_url: {
-		test: async (a: string) => {
-			if(!validUrl.isWebUri(a)) return false;
-			try {
-				var data = await axios.head(a);
-				if(data.headers["content-type"]?.startsWith("image")) return true;
-				return false;
-			} catch(e) { return false; }
-		},
-		err: "Avatar URL must be a valid image and less than 256 characters"
-	},
-	banner: {
-		test: async (a: string) => {
-			if(!validUrl.isWebUri(a)) return false;
-			try {
-				var data = await axios.head(a);
-				if(data.headers["content-type"]?.startsWith("image")) return true;
-				return false;
-			} catch(e) { return false; }
-		},
-		err: "Banner URL must be a valid image and less than 256 characters"
 	},
 	birthday: {
 		test: (d: string | Date) => {
@@ -128,6 +101,50 @@ const KEYS: any = {
 		},
 		init: (d: string | Date) => d ? new Date(d) : d
 	},
+	pronouns: {
+		test: (p: string) => !p.length || p.length <= 100,
+		err: "Pronouns must be 100 characters or less"
+	},
+	avatar_url: {
+		test: async (a: string) => {
+			if(!validUrl.isWebUri(a)) return false;
+			try {
+				var data = await axios.head(a);
+				if(data.headers["content-type"]?.startsWith("image")) return true;
+				return false;
+			} catch(e) { return false; }
+		},
+		err: "Avatar URL must be a valid image and less than 256 characters"
+	},
+	webhook_avatar_url: {
+		test: async (a: string) => {
+			if(!validUrl.isWebUri(a)) return false;
+			try {
+				var data = await axios.head(a);
+				if(data.headers["content-type"]?.startsWith("image")) return true;
+				return false;
+			} catch(e) { return false; }
+		},
+		err: "Webhook avatar URL must be a valid image and less than 256 characters"
+	},
+	banner: {
+		test: async (a: string) => {
+			if(!validUrl.isWebUri(a)) return false;
+			try {
+				var data = await axios.head(a);
+				if(data.headers["content-type"]?.startsWith("image")) return true;
+				return false;
+			} catch(e) { return false; }
+		},
+		err: "Banner URL must be a valid image and less than 256 characters"
+	},
+	description: {
+		test: (d: string) => !d.length || d.length < 1000,
+		err: "Description must be 1000 characters or less"
+	},
+	created: {
+		init: (d: string | Date) => new Date(d)
+	},
 	proxy_tags: {
 		test: (p: ProxyTag[]) => Array.isArray(p) && !p.some(t => !hasKeys(t, ['prefix', 'suffix'])),
 		err: "Proxy tags must be an array of objects containing 'prefix' and 'suffix' keys"
@@ -136,7 +153,16 @@ const KEYS: any = {
 		test: (v: any) => typeof v == "boolean",
 		err: "Keep proxy must be a boolean (true or false)"
 	},
-	created: {
+	tts: {
+		test: (v: any) => typeof v == "boolean",
+		err: "TTS must be a boolean (true or false)"
+	},
+	autoproxy_enabled: {
+		test: (v: any) => typeof v == "boolean",
+		err: "Autoproxy status must be a boolean (true or false)"
+	},
+	message_count: { },
+	last_message_timestamp: {
 		init: (d: string | Date) => new Date(d)
 	},
 	privacy: {
@@ -155,15 +181,20 @@ export interface IMember {
 	system: string;
 	name: string;
 	display_name?: string;
-	description?: string;
-	pronouns?: string;
 	color?: string;
-	avatar_url?: string;
-	banner?: string;
 	birthday?: Date | string;
+	pronouns?: string;
+	avatar_url?: string;
+	webhook_avatar_url?: string;
+	banner?: string;
+	description?: string;
+	created: Date | string;
 	proxy_tags?: ProxyTag[];
 	keep_proxy?: boolean;
-	created: Date | string;
+	tts?: boolean;
+	autoproxy_enabled?: boolean;
+	message_count?: number;
+	last_message_timestamp?: Date;
 	privacy: MemberPrivacy;
 
 	groups?: Map<string, Group>;
@@ -180,15 +211,20 @@ export default class Member implements IMember {
 	system: string = '';
 	name: string = '';
 	display_name?: string;
-	description?: string;
-	pronouns?: string;
 	color?: string;
-	avatar_url?: string;
-	banner?: string;
 	birthday?: Date | string;
+	pronouns?: string;
+	avatar_url?: string;
+	webhook_avatar_url?: string;
+	banner?: string;
+	description?: string;
+	created: Date | string = '';
 	proxy_tags?: ProxyTag[];
 	keep_proxy?: boolean;
-	created: Date | string = '';
+	tts?: boolean;
+	autoproxy_enabled?: boolean;
+	message_count?: number;
+	last_message_timestamp?: Date;
 	privacy: MemberPrivacy = {};
 
 	groups?: Map<string, Group>;

@@ -1,8 +1,11 @@
 export function validatePrivacy(keys: Array<string>, obj: any) {
-	var priv: any = {}
+	var priv: any = {};
 	for(var k of keys) {
 		if(obj[k] == null) continue;
-		if(['private', 'public'].includes(obj[k])) continue;
+		if(['private', 'public'].includes(obj[k])) {
+			priv[k] = obj[k];
+			continue;
+		}
 
 		priv[k] = obj[k] ? 'public' : 'private';
 	}

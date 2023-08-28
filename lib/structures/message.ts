@@ -11,6 +11,7 @@ const KEYS: any = {
 	original: { },
 	sender: { },
 	channel: { },
+	guild: { },
 	system: {
 		init: (s: Partial<System>, api: API) => s ? new System(api, s) : null
 	},
@@ -25,6 +26,7 @@ export interface IMessage {
 	original?: string;
 	sender: string;
 	channel: string;
+	guild: string;
 	system?: string | System;
 	member?: string | Member;
 }
@@ -39,6 +41,7 @@ export default class Message implements IMessage {
 	original?: string;
 	sender: string = '';
 	channel: string = '';
+	guild: string = '';
 	system?: string | System;
 	member?: string | Member;
 
