@@ -29,7 +29,7 @@ const ROUTES: any = {
 		DELETE_MEMBER: (mid: string) => ({method: 'DELETE', route: `/members/${mid}`}),
 
 		ADD_GROUP: () => ({method: 'POST', route: `/groups`}),
-		GET_GROUPS: (sid: string) => ({method: 'GET', route: `/systems/${sid}/groups`}),
+		GET_GROUPS: (sid: string, members?: boolean) => ({method: 'GET', route: `/systems/${sid}/groups?with_members=${members ? 'true' : 'false'}`}),
 		GET_GROUP: (gid: string) => ({method: 'GET', route: `/groups/${gid}`}),
 		PATCH_GROUP: (gid: string) => ({method: 'PATCH', route: `/groups/${gid}`}),
 		DELETE_GROUP: (gid: string) => ({method: 'DELETE', route: `/groups/${gid}`}),

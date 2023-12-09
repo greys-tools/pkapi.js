@@ -74,6 +74,16 @@ const KEYS: any = {
 	created: {
 		init: (d: string | Date) => new Date(d)
 	},
+	members: {
+		transform: (mems: Map<string, Member> | Array<string>) => {
+			var arr = [];
+			if(mems instanceof Map) for(var m of mems.values()) arr.push(m.id ?? m);
+			else arr = mems.map((m: Member | string) => {
+				return m instanceof Member ? m.id : m;
+			});
+			return arr;
+		}
+	},
 	privacy: {
 		transform: (o: any) => validatePrivacy(pKeys, o)
 	}
@@ -90,8 +100,7 @@ export interface IGroup {
 	color?: string | Object;
 	created: Date | string;
 	privacy: GroupPrivacy;
-
-	members?: Map<string, Member>;
+	members?: Map<string, Member> | Array<string>;
 }
 
 export default class Group implements IGroup {
@@ -109,8 +118,7 @@ export default class Group implements IGroup {
 	color?: string | Object;
 	created: Date | string = '';
 	privacy: GroupPrivacy = {};
-
-	members?: Map<string, Member>;
+	members?: Map<string, Member> | Array<string>;
 	
 	constructor(api: API, data: Partial<Group>) {
 		this.#api = api;

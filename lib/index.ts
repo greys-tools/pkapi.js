@@ -36,6 +36,7 @@ export const enum SystemFetchOptions {
 	Switches = 'switches',
 	Groups = 'groups',
 	Config = 'config',
+	GroupMembers = 'group members',
 }
 
 export type RequestData<T extends {}> = T & {
@@ -89,7 +90,7 @@ class PKAPI {
 				if(data.fetch.includes(SystemFetchOptions.Members)) sys.members = await sys.getMembers(token);
 				if(data.fetch.includes(SystemFetchOptions.Fronters)) sys.fronters = await sys.getFronters(token);
 				if(data.fetch.includes(SystemFetchOptions.Switches)) sys.switches = await sys.getSwitches(token, data.raw);
-				if(data.fetch.includes(SystemFetchOptions.Groups)) sys.groups = await sys.getGroups(token);
+				if(data.fetch.includes(SystemFetchOptions.Groups)) sys.groups = await sys.getGroups(data.fetch.includes(SystemFetchOptions.GroupMembers), token);
 				if(data.fetch.includes(SystemFetchOptions.Config)) sys.config = await sys.getSettings(token);
 			}
 		} catch(e) {
@@ -430,14 +431,15 @@ class PKAPI {
 		return new Group(this, resp.data);
 	}
 
-	async getGroups(data: { token?: string, system?: string }) {
+	async getGroups(data: { token?: string, system?: string, with_members?: boolean }) {
 		if(this.version < 2) throw new Error("Groups are only available for API version 2.");
 
 		var token = this.#token || data.token;
 		var system = data.system ?? '@me';
+		var with_members = data.with_members ?? false;
 
 		try {
-			var resp = await this.handle(ROUTES[this.#_version].GET_GROUPS(system), {token});
+			var resp = await this.handle(ROUTES[this.#_version].GET_GROUPS(system, with_members), {token});
 		} catch(e) {
 			throw e;
 		}
