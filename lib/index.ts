@@ -94,7 +94,7 @@ class PKAPI {
 				if(data.fetch.includes(SystemFetchOptions.Members)) sys.members = await sys.getMembers(token);
 				if(data.fetch.includes(SystemFetchOptions.Fronters)) sys.fronters = await sys.getFronters(token);
 				if(data.fetch.includes(SystemFetchOptions.Switches)) sys.switches = await sys.getSwitches(token, data.raw);
-				if(data.fetch.includes(SystemFetchOptions.Groups)) sys.groups = await sys.getGroups(data.fetch.includes(SystemFetchOptions.GroupMembers), token);
+				if(data.fetch.includes(SystemFetchOptions.Groups)) sys.groups = await sys.getGroups(token, data.fetch.includes(SystemFetchOptions.GroupMembers));
 				if(data.fetch.includes(SystemFetchOptions.Config)) sys.config = await sys.getSettings(token);
 			}
 		} catch(e) {
