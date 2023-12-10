@@ -8,27 +8,31 @@ import { validatePrivacy } from '../utils';
 import Member from './member';
 import Group from './group';
 import Switch from './switch';
-import SystemGuildSettings from './systemGuildSettings';
 import SystemConfig from './systemConfig';
+import SystemGuildSettings from './systemGuildSettings';
+import SystemAutoproxyConfig from './systemAutoproxySettings';
 
 export const enum SystemPrivacyKeys {
-	Description = 'description_privacy',
-	MemberList = 'member_list_privacy',
-	GroupList = 'group_list_privacy',
-	Front = 'front_privacy',
-	FrontHistory = 'front_history_privacy'
+	Description = 	'description_privacy',
+	Pronouns = 		'pronoun_privacy',
+	MemberList = 	'member_list_privacy',
+	GroupList = 	'group_list_privacy',
+	Front = 		'front_privacy',
+	FrontHistory = 	'front_history_privacy'
 }
 
 const pKeys = [
-	'description_privacy',
-	'member_list_privacy',
-	'group_list_privacy',
-	'front_privacy',
-	'front_history_privacy'
+	SystemPrivacyKeys.Description,
+	SystemPrivacyKeys.Pronouns,
+	SystemPrivacyKeys.MemberList,
+	SystemPrivacyKeys.GroupList,
+	SystemPrivacyKeys.Front,
+	SystemPrivacyKeys.FrontHistory
 ]
 
 export interface SystemPrivacy {
 	description_privacy?: string;
+	pronoun_privacy?: string;
 	member_list_privacy?: string;
 	group_list_privacy?: string;
 	front_privacy?: string;
@@ -47,6 +51,7 @@ const KEYS: any = {
 		err: "Description must be 1000 characters or less"
 	},
 	tag: { },
+	pronouns: { },
 	avatar_url: {
 		test: async (a: string) => {
 			if(!validUrl.isWebUri(a)) return false;
@@ -88,6 +93,7 @@ export interface ISystem {
 	name?: string;
 	description?: string;
 	tag?: string;
+	pronouns?: string;
 	avatar_url?: string;
 	banner?: string;
 	color?: string;
@@ -100,6 +106,7 @@ export interface ISystem {
 	switches?: Map<string, Switch>;
 	settings?: Map<string, SystemGuildSettings>;
 	config?: SystemConfig;
+	autoproxySettings?: Map<string, SystemAutoproxyConfig>;
 }
 
 export default class System implements ISystem {
@@ -112,6 +119,7 @@ export default class System implements ISystem {
 	name?: string;
 	description?: string;
 	tag?: string;
+	pronouns?: string;
 	avatar_url?: string;
 	banner?: string;
 	color?: string;
@@ -124,6 +132,7 @@ export default class System implements ISystem {
 	switches?: Map<string, Switch>;
 	settings?: Map<string, SystemGuildSettings>;
 	config?: SystemConfig;
+	autoproxySettings?: Map<string, SystemAutoproxyConfig>;
 	
 	constructor(api: API, data: Partial<System>) {
 		this.#api = api;
@@ -225,6 +234,13 @@ export default class System implements ISystem {
 		var settings = await this.#api.getSystemGuildSettings({guild, token});
 		if(!this.settings) this.settings = new Map();
 		this.settings.set(guild, settings);
+		return settings;
+	}
+
+	async getAutoproxySettings(guild: string, token?: string) {
+		var settings = await this.#api.getSystemAutoproxySettings({guild, token});
+		if(!this.autoproxySettings) this.autoproxySettings = new Map();
+		this.autoproxySettings.set(guild, settings);
 		return settings;
 	}
 

@@ -20,6 +20,9 @@ const KEYS: any = {
 			} catch(e) { return false; }
 		},
 		err: "Avatar URL must be a valid image and less than 256 characters"
+	},
+	keep_proxy: {
+		transform: (v?: any) => v ? true : false
 	}
 }
 
@@ -30,6 +33,7 @@ export interface IMemberGuildSettings {
 	member: string;
 	display_name?: string;
 	avatar_url?: string;
+	keep_proxy?: boolean;
 }
 
 export default class MemberGuildSettings implements IMemberGuildSettings {
@@ -40,6 +44,7 @@ export default class MemberGuildSettings implements IMemberGuildSettings {
 	member = '';
 	display_name?: string;
 	avatar_url?: string;
+	keep_proxy?: boolean;
 
 	constructor(api: API, data: Partial<MemberGuildSettings>) {
 		this.#api = api;

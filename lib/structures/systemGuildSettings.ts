@@ -1,29 +1,10 @@
 import API from '../index';
 
-export enum AutoProxyModes {
-	Off = 'off',
-	Front = 'front',
-	Latch = 'latch',
-	Member = 'member'
-}
-
-const apVals: string[] = [
-	AutoProxyModes.Off,
-	AutoProxyModes.Front,
-	AutoProxyModes.Latch,
-	AutoProxyModes.Member
-]
-
 const KEYS: any = {
 	guild: { },
 	proxying_enabled: {
 		transform: (v?: any) => v ? true : false
 	},
-	autoproxy_mode: {
-		test: (s?: string) => s && apVals.includes(s),
-		err: `Valid autoproxy mode values: ${apVals.join(", ")}`
-	},
-	autoproxy_member: { },
 	tag: {
 		test: (s?: string) => s!.length <= 79,
 		err: 'Server tag must be 79 characters or less'
@@ -38,7 +19,6 @@ export interface ISystemGuildSettings {
 
 	guild: string;
 	proxying_enabled?: boolean;
-	autoproxy_mode?: AutoProxyModes;
 	tag?: string;
 	tag_enabled?: boolean;
 }
@@ -50,7 +30,6 @@ export default class SystemGuildSettings implements ISystemGuildSettings {
 	
 	guild = '';
 	proxying_enabled?: boolean;
-	autoproxy_mode?: AutoProxyModes;
 	tag?: string;
 	tag_enabled?: boolean;
 
@@ -89,9 +68,6 @@ export default class SystemGuildSettings implements ISystemGuildSettings {
 			if(KEYS[k].transform) this[k] = KEYS[k].transform(this[k]);
 			settings[k] = this[k];
 		}
-
-		if(settings.autoproxy_mode == 'member' && !settings.autoproxy_member)
-			errors.push('Autoproxy member MUSt be supplied if mode is set to "member"');
 
 		if(errors.length) throw new Error(errors.join("\n"));
 

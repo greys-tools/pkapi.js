@@ -7,6 +7,7 @@ import Switch, {ISwitch} from './structures/switch';
 import Message, {IMessage} from './structures/message';
 import SystemConfig, {ISystemConfig} from './structures/systemConfig';
 import SystemGuildSettings, {ISystemGuildSettings} from './structures/systemGuildSettings';
+import SystemAutoproxySettings, {ISystemAutoproxySettings} from './structures/systemAutoproxySettings';
 import MemberGuildSettings, {IMemberGuildSettings} from './structures/memberGuildSettings';
 
 import APIError from './structures/apiError';
@@ -18,6 +19,7 @@ export interface APIData {
 	version?: number;
 	token?: string;
 	user_agent?: string;
+	debug?: boolean;
 }
 
 export interface RequestOptions {
@@ -49,6 +51,7 @@ class PKAPI {
 	#_base: string = 'https://api.pluralkit.me';
 	#_version: number = 2;
 	#user_agent: string = 'PKAPI.js/5.x';
+	#debug: boolean = true;
 
 	#version_warning = false;
 	
@@ -57,6 +60,7 @@ class PKAPI {
 		this.#_version = (data?.version ?? 2);
 		this.#token = data?.token;
 		this.#user_agent = (data?.user_agent ?? 'PKAPI.js/5.x');
+		this.#debug = (data?.debug !== undefined ? data.debug : true);
 
 		this.#inst = axios.create({
 			validateStatus: (s) => s < 300 && s > 100,
@@ -154,7 +158,7 @@ class PKAPI {
 		return new SystemConfig(this, resp.data);
 	}
 
-	async getSystemGuildSettings(data: { token?: string, guild: string}) {
+	async getSystemGuildSettings(data: { token?: string, guild: string }) {
 		if(this.version < 2) throw new Error("Guild settings are only available for API version 2.");
 
 		var token = this.#token || data.token;
@@ -189,6 +193,43 @@ class PKAPI {
 		}
 
 		return new SystemGuildSettings(this, {...resp.data, guild: data.guild});
+	}
+
+	async getSystemAutoproxySettings(data: { token?: string, guild: string }) {
+		if(this.version < 2) throw new Error("Autoproxy settings are only available for API version 2.");
+
+		var token = this.#token || data.token;
+		if(!token) throw new Error("Getting autoproxy settings requires a token.");
+		if(!data.guild) throw new Error("Must provide a guild ID.");
+
+		try {
+			var resp = await this.handle(ROUTES[this.#_version].GET_SYSTEM_AUTOPROXY_SETTINGS(data.guild), {token});
+		} catch(e) {
+			throw e;
+		}
+
+		return new SystemAutoproxySettings(this, {...resp.data, guild: data.guild});
+	}
+
+	async patchSystemAutoproxySettings(data: RequestData<ISystemAutoproxySettings>) {
+		if(this.version < 2) throw new Error("Autoproxy settings are only available for API version 2.");
+
+		var token = this.#token || data.token;
+		if(!token) throw new Error("PATCH requires a token.");
+		if(!data.guild) throw new Error("Must provide a guild ID.");
+
+		try {
+			var settings = data instanceof SystemAutoproxySettings ? data : new SystemAutoproxySettings(this, data);
+			var body = await settings.verify();
+			var resp = await this.handle(
+				ROUTES[this.#_version].PATCH_SYSTEM_AUTOPROXY_SETTINGS(data.guild),
+				{token, body}
+			);
+		} catch(e) {
+			throw e;
+		}
+
+		return new SystemAutoproxySettings(this, {...resp.data, guild: data.guild});
 	}
 
 	/*
@@ -842,7 +883,7 @@ class PKAPI {
 		try {
 			var resp = await this.#inst(route, request);
 		} catch(e: any) {
-			console.log(e)
+			if(this.#debug) console.log(e)
 			throw new APIError(this, e.response);
 		}
 
@@ -883,10 +924,20 @@ class PKAPI {
 		this.#user_agent = s;
 		this.#inst.defaults.headers['User-Agent'] = s;
 	}
+
+	get debug() {
+		return this.#debug
+	}
+
+	set debug(b) {
+		this.#debug = b;
+	}
 }
 
 export default PKAPI;
 export {
+	PKAPI,
+	
 	APIError,
 
 	Group,

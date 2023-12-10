@@ -35,6 +35,9 @@ const KEYS: any = {
 	group_default_private: {
 		transform: (v?: any) => v ? true : false
 	},
+	show_private_info: {
+		transform: (v?: any) => v ? true : false
+	},
 	member_limit: { },
 	group_limit: { }
 }
@@ -45,6 +48,7 @@ export interface ISystemConfig {
 	latch_timeout?: number;
 	member_default_private?: boolean;
 	group_default_private?: boolean;
+	show_private_info?: boolean;
 	member_limit?: number;
 	group_limit?: number;
 }
@@ -59,6 +63,7 @@ export default class SystemConfig implements ISystemConfig {
 	latch_timeout?: number;
 	member_default_private?: boolean;
 	group_default_private?: boolean;
+	show_private_info?: boolean;
 	member_limit?: number;
 	group_limit?: number;
 
