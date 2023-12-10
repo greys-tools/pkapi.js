@@ -183,7 +183,7 @@ export default class System implements ISystem {
 		return group;
 	}
 
-	async getGroups(with_members?: boolean, token?: string) {
+	async getGroups(token?: string, with_members: boolean = false) {
 		var groups = await this.#api.getGroups({system: this.id, with_members, token});
 		this.groups = groups;
 		return groups;
@@ -206,8 +206,8 @@ export default class System implements ISystem {
 		return this.#api.createSwitch(data);
 	}
 
-	async getSwitches(token?: string, raw: boolean = false) {
-		var switches = await this.#api.getSwitches({system: this.id, token, raw});
+	async getSwitches(token?: string, raw: boolean = false, before?: Date, limit: number = 100) {
+		var switches = await this.#api.getSwitches({system: this.id, token, raw, before, limit});
 		this.switches = switches;
 		return switches;
 	}

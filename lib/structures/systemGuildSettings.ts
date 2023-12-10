@@ -1,5 +1,8 @@
 import API from '../index';
 
+import axios from 'axios';
+import validUrl from 'valid-url';
+
 const KEYS: any = {
 	guild: { },
 	proxying_enabled: {
@@ -11,6 +14,21 @@ const KEYS: any = {
 	},
 	tag_enabled: {
 		transform: (v?: any) => v ? true : false
+	},
+	avatar_url: {
+		test: async (a: string) => {
+			if(!validUrl.isWebUri(a)) return false;
+			try {
+				var data = await axios.head(a);
+				if(data.headers["content-type"]?.startsWith("image")) return true;
+				return false;
+			} catch(e) { return false; }
+		},
+		err: "Avatar URL must be a valid image and less than 256 characters"
+	},
+	display_name: {
+		test: (d: string) => !d.length || d.length <= 100,
+		err: "Display name must be 100 characters or less"
 	}
 }
 
@@ -21,6 +39,8 @@ export interface ISystemGuildSettings {
 	proxying_enabled?: boolean;
 	tag?: string;
 	tag_enabled?: boolean;
+	avatar_url?: string;
+	display_name?: string;
 }
 
 export default class SystemGuildSettings implements ISystemGuildSettings {
@@ -32,6 +52,8 @@ export default class SystemGuildSettings implements ISystemGuildSettings {
 	proxying_enabled?: boolean;
 	tag?: string;
 	tag_enabled?: boolean;
+	avatar_url?: string;
+	display_name?: string;
 
 	constructor(api: API, data: Partial<SystemGuildSettings> = { }) {
 		this.#api = api;

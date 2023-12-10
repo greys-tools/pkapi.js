@@ -680,12 +680,15 @@ class PKAPI {
 	async getSwitches(data: {
 		token?: string,
 		system?: string,
-		raw?: boolean
+		raw?: boolean,
+		before?: Date,
+		limit?: number,
 	}) {
 		var system = data.system ?? '@me';
 		var token = this.#token || data.token;
+		var { before, limit } = data;
 		try {
-			var resp = await this.handle(ROUTES[this.#_version].GET_SWITCHES(system), {token});
+			var resp = await this.handle(ROUTES[this.#_version].GET_SWITCHES(system, before, limit), {token});
 			if(!data.raw) {
 				var memb_resp = await this.handle(ROUTES[this.#_version].GET_MEMBERS(system), {token});
 				var membs = new Map(memb_resp.data.map((m: IMember) => [m.id, new Member(this, m)]));

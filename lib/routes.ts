@@ -45,7 +45,17 @@ const ROUTES: any = {
 		SET_MEMBER_GROUPS: (mid: string) => ({method: 'POST', route: `/members/${mid}/groups/overwrite`}),
 
 		ADD_SWITCH: () => ({method: 'POST', route: `/systems/@me/switches`}),
-		GET_SWITCHES: (sid: string) => ({method: 'GET', route: `/systems/${sid}/switches`}),
+		GET_SWITCHES: (sid: string, before: Date, limit: number) => {
+			var tmp = {method: 'GET', route: `/systems/${sid}/switches`};
+			var adds = [];
+
+			if(before) adds.push(`before=${before.toISOString()}`);
+			if(limit) adds.push(`limit=${limit}`);
+
+			if(adds.length) tmp.route += `?${adds.join('&')}`;
+
+			return tmp;
+		},
 		GET_FRONTERS: (sid: string) => ({method: 'GET', route: `/systems/${sid}/fronters`}),
 		GET_SWITCH: (sid: string, swid: string) => ({method: 'GET', route: `/systems/${sid}/switches/${swid}`}),
 		PATCH_SWITCH: (swid: string) => ({method: 'PATCH', route: `/systems/@me/switches/${swid}`}),
