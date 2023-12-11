@@ -183,8 +183,8 @@ export default class System implements ISystem {
 		return group;
 	}
 
-	async getGroups(token?: string, with_members: boolean = false) {
-		var groups = await this.#api.getGroups({system: this.id, with_members, token});
+	async getGroups(token?: string, with_members: boolean = false, raw: boolean = false) {
+		var groups = await this.#api.getGroups({system: this.id, with_members, raw, token});
 		this.groups = groups;
 		return groups;
 	}

@@ -472,21 +472,37 @@ class PKAPI {
 		return new Group(this, resp.data);
 	}
 
-	async getGroups(data: { token?: string, system?: string, with_members?: boolean }) {
+	async getGroups(data: { token?: string, system?: string, with_members?: boolean, raw?: boolean }) {
 		if(this.version < 2) throw new Error("Groups are only available for API version 2.");
 
 		var token = this.#token || data.token;
 		var system = data.system ?? '@me';
 		var with_members = data.with_members ?? false;
 
+		var groups;
 		try {
 			var resp = await this.handle(ROUTES[this.#_version].GET_GROUPS(system, with_members), {token});
+			if(with_members && !data.raw) {
+				var memb_resp = await this.handle(ROUTES[this.#_version].GET_MEMBERS(system), {token});
+				var membs: Map<string, Member> = new Map(memb_resp.data.map((m: IMember) => [m.uuid, new Member(this, m)]));
+				groups = [];
+				for(var g of resp.data) {
+					var members = new Map();
+					for(var m of g.members) {
+						var grabbed: Member | undefined = membs.get(m);
+						if(grabbed) members.set(grabbed.id, grabbed);
+					}
+					g.members = members;
+					groups.push(new Group(this, g));
+				}
+			}
 		} catch(e) {
 			throw e;
 		}
 
-		var groups = resp.data.map((g: IGroup) => [g.id, new Group(this, g)]);
-		return new Map<string, Group>(groups);
+		if(!with_members || data.raw) groups = resp.data.map((g: IGroup) => new Group(this, g));
+
+		return new Map<string, Group>(groups.map((g: IGroup) => [g.id, g]));
 	}
 
 	async getGroup(data: {
