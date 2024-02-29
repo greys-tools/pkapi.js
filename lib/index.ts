@@ -763,6 +763,8 @@ class PKAPI {
 			throw e;
 		}
 
+		if(resp.status == 204) return undefined;
+
 		return new Switch(this, {
 			...resp.data,
 			members: new Map(resp.data.members.map((m: IMember) => [m.id, new Member(this, m)]))
