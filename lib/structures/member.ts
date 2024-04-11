@@ -163,7 +163,7 @@ const KEYS: any = {
 	},
 	message_count: { },
 	last_message_timestamp: {
-		init: (d: string | Date) => new Date(d)
+		init: (d: string | Date) => d ? new Date(d) : d
 	},
 	privacy: {
 		transform: (o: Partial<MemberPrivacy>) => validatePrivacy(pKeys, o)

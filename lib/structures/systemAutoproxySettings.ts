@@ -22,7 +22,7 @@ const KEYS: any = {
 	},
 	autoproxy_member: { },
 	last_latch_timestamp: {
-		init: (d: Date | string) => new Date(d)
+		init: (d: Date | string) => d ? new Date(d) : d
 	}
 }
 
