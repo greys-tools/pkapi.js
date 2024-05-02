@@ -36,6 +36,7 @@ export interface GroupPrivacy {
 const KEYS: any = {
 	id: { },
 	uuid: { },
+	system: { },
 	name: {
 		test: (n: string) => n.length && n.length <= 100,
 		err: "Name must be 100 characters or less",
@@ -116,6 +117,7 @@ export default class Group implements IGroup {
 
 	id: string = '';
 	uuid: string = '';
+	system: string = '';
 	name: string = '';
 	display_name?: string;
 	description?: string;
