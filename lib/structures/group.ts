@@ -99,6 +99,7 @@ const KEYS: any = {
 export interface IGroup {
 	id: string;
 	uuid: string;
+	system?: string;
 	name: string;
 	display_name?: string;
 	description?: string;
@@ -117,7 +118,7 @@ export default class Group implements IGroup {
 
 	id: string = '';
 	uuid: string = '';
-	system: string = '';
+	system?: string = '';
 	name: string = '';
 	display_name?: string;
 	description?: string;
