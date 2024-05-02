@@ -178,7 +178,7 @@ export interface ProxyTag {
 export interface IMember {
 	id: string;
 	uuid: string;
-	system: string;
+	system?: string;
 	name: string;
 	display_name?: string;
 	color?: string;
@@ -208,7 +208,7 @@ export default class Member implements IMember {
 
 	id: string = '';
 	uuid: string = '';
-	system: string = '';
+	system?: string = '';
 	name: string = '';
 	display_name?: string;
 	color?: string;
