@@ -29,7 +29,7 @@ const KEYS: any = {
 export interface ISystemAutoproxySettings {
 	guild: string;
 	autoproxy_mode?: AutoProxyModes;
-	autoproxy_member?: string;
+	autoproxy_member?: string | null;
 	last_latch_timestamp?: Date;
 }
 
@@ -40,7 +40,7 @@ export default class SystemAutoproxySettings implements ISystemAutoproxySettings
 
 	guild: string = '';
 	autoproxy_mode?: AutoProxyModes;
-	autoproxy_member?: string;
+	autoproxy_member?: string | null;
 	last_latch_timestamp?: Date;
 
 	constructor(api: API, data: Partial<SystemAutoproxySettings> = { }) {

@@ -90,13 +90,13 @@ const KEYS: any = {
 export interface ISystem {
 	id: string;
 	uuid: string;
-	name?: string;
-	description?: string;
-	tag?: string;
-	pronouns?: string;
-	avatar_url?: string;
-	banner?: string;
-	color?: string;
+	name?: string | null;
+	description?: string | null;
+	tag?: string | null;
+	pronouns?: string | null;
+	avatar_url?: string | null;
+	banner?: string | null;
+	color?: string | null;
 	created: Date | string;
 	privacy?: SystemPrivacy;
 
@@ -116,13 +116,13 @@ export default class System implements ISystem {
 
 	id: string = '';
 	uuid: string = '';
-	name?: string;
-	description?: string;
-	tag?: string;
-	pronouns?: string;
-	avatar_url?: string;
-	banner?: string;
-	color?: string;
+	name?: string | null;
+	description?: string | null;
+	tag?: string | null;
+	pronouns?: string | null;
+	avatar_url?: string | null;
+	banner?: string | null;
+	color?: string | null;
 	created: Date | string = '';
 	privacy?: SystemPrivacy;
 

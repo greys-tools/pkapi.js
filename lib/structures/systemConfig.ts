@@ -45,7 +45,7 @@ const KEYS: any = {
 export interface ISystemConfig {
 	timezone?: string;
 	pings_enabled?: boolean;
-	latch_timeout?: number;
+	latch_timeout?: number | null;
 	member_default_private?: boolean;
 	group_default_private?: boolean;
 	show_private_info?: boolean;
@@ -60,7 +60,7 @@ export default class SystemConfig implements ISystemConfig {
 
 	timezone?: string;
 	pings_enabled?: boolean;
-	latch_timeout?: number;
+	latch_timeout?: number | null;
 	member_default_private?: boolean;
 	group_default_private?: boolean;
 	show_private_info?: boolean;

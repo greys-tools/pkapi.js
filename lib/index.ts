@@ -967,17 +967,20 @@ export {
 	Member,
 	IMember,
 
-	System,
-	ISystem,
-
-	Switch,
-	ISwitch,
+	MemberGuildSettings,
+	IMemberGuildSettings,
 
 	Message,
 	IMessage,
 
-	MemberGuildSettings,
-	IMemberGuildSettings,
+	Switch,
+	ISwitch,
+
+	System,
+	ISystem,
+
+	SystemAutoproxySettings,
+	ISystemAutoproxySettings,
 
 	SystemConfig,
 	ISystemConfig,

@@ -31,8 +31,8 @@ export interface IMemberGuildSettings {
 
 	guild: string;
 	member: string;
-	display_name?: string;
-	avatar_url?: string;
+	display_name?: string | null;
+	avatar_url?: string | null;
 	keep_proxy?: boolean;
 }
 
@@ -42,8 +42,8 @@ export default class MemberGuildSettings implements IMemberGuildSettings {
 	#api: API;
 	guild = '';
 	member = '';
-	display_name?: string;
-	avatar_url?: string;
+	display_name?: string | null;
+	avatar_url?: string | null;
 	keep_proxy?: boolean;
 
 	constructor(api: API, data: Partial<MemberGuildSettings>) {

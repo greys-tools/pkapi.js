@@ -37,10 +37,10 @@ export interface ISystemGuildSettings {
 
 	guild: string;
 	proxying_enabled?: boolean;
-	tag?: string;
+	tag?: string | null;
 	tag_enabled?: boolean;
-	avatar_url?: string;
-	display_name?: string;
+	avatar_url?: string | null;
+	display_name?: string | null;
 }
 
 export default class SystemGuildSettings implements ISystemGuildSettings {
@@ -50,10 +50,10 @@ export default class SystemGuildSettings implements ISystemGuildSettings {
 	
 	guild = '';
 	proxying_enabled?: boolean;
-	tag?: string;
+	tag?: string | null;
 	tag_enabled?: boolean;
-	avatar_url?: string;
-	display_name?: string;
+	avatar_url?: string | null;
+	display_name?: string | null;
 
 	constructor(api: API, data: Partial<SystemGuildSettings> = { }) {
 		this.#api = api;

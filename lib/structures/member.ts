@@ -55,14 +55,14 @@ const pKeys = [
 ]
 
 export interface MemberPrivacy {
-	visibility?: string;
-	name_privacy?: string;
-	description_privacy?: string;
-	birthday_privacy?: string;
-	pronoun_privacy?: string;
-	avatar_privacy?: string;
-	metadata_privacy?: string;
-	proxy_privacy?: string;
+	visibility?: string | null;
+	name_privacy?: string | null;
+	description_privacy?: string | null;
+	birthday_privacy?: string | null;
+	pronoun_privacy?: string | null;
+	avatar_privacy?: string | null;
+	metadata_privacy?: string | null;
+	proxy_privacy?: string | null;
 }
 
 const KEYS: any = {
@@ -146,8 +146,8 @@ const KEYS: any = {
 		init: (d: string | Date) => new Date(d)
 	},
 	proxy_tags: {
-		test: (p: ProxyTag[]) => Array.isArray(p) && !p.some(t => !hasKeys(t, ['prefix', 'suffix'])),
-		err: "Proxy tags must be an array of objects containing 'prefix' and 'suffix' keys"
+		test: (p: ProxyTag[]) => Array.isArray(p) && !p.some(t => !hasKeys(t, ['prefix', 'suffix']) || `${t.prefix}text${t.suffix}`.length > 100),
+		err: "Proxy tags must be an array of objects containing 'prefix' and 'suffix' keys, and the combined prefix + 'text' + suffix must be less than 100 characters"
 	},
 	keep_proxy: {
 		test: (v: any) => typeof v == "boolean",
@@ -180,14 +180,14 @@ export interface IMember {
 	uuid: string;
 	system?: string;
 	name: string;
-	display_name?: string;
-	color?: string;
-	birthday?: Date | string;
-	pronouns?: string;
-	avatar_url?: string;
-	webhook_avatar_url?: string;
-	banner?: string;
-	description?: string;
+	display_name?: string | null;
+	color?: string | null;
+	birthday?: Date | string | null;
+	pronouns?: string | null;
+	avatar_url?: string | null;
+	webhook_avatar_url?: string | null;
+	banner?: string | null;
+	description?: string | null;
 	created: Date | string;
 	proxy_tags?: ProxyTag[];
 	keep_proxy?: boolean;
@@ -208,16 +208,16 @@ export default class Member implements IMember {
 
 	id: string = '';
 	uuid: string = '';
-	system?: string = '';
+	system?: string;
 	name: string = '';
-	display_name?: string;
-	color?: string;
-	birthday?: Date | string;
-	pronouns?: string;
-	avatar_url?: string;
-	webhook_avatar_url?: string;
-	banner?: string;
-	description?: string;
+	display_name?: string | null;
+	color?: string | null;
+	birthday?: Date | string | null;
+	pronouns?: string | null;
+	avatar_url?: string | null;
+	webhook_avatar_url?: string | null;
+	banner?: string | null;
+	description?: string | null;
 	created: Date | string = '';
 	proxy_tags?: ProxyTag[];
 	keep_proxy?: boolean;

@@ -25,12 +25,12 @@ const pKeys = [
 ]
 
 export interface GroupPrivacy {
-	name_privacy?: string;
-	description_privacy?: string;
-	icon_privacy?: string;
-	list_privacy?: string;
-	metadata_privacy?: string;
-	visibility?: string;
+	name_privacy?: string | null;
+	description_privacy?: string | null;
+	icon_privacy?: string | null;
+	list_privacy?: string | null;
+	metadata_privacy?: string | null;
+	visibility?: string | null;
 }
 
 const KEYS: any = {
@@ -101,11 +101,11 @@ export interface IGroup {
 	uuid: string;
 	system?: string;
 	name: string;
-	display_name?: string;
-	description?: string;
-	icon?: string;
-	banner?: string;
-	color?: string | Object;
+	display_name?: string | null;
+	description?: string | null;
+	icon?: string | null;
+	banner?: string | null;
+	color?: string | null;
 	created: Date | string;
 	privacy: GroupPrivacy;
 	members?: Map<string, Member> | Array<string>;
@@ -120,11 +120,11 @@ export default class Group implements IGroup {
 	uuid: string = '';
 	system?: string = '';
 	name: string = '';
-	display_name?: string;
-	description?: string;
-	icon?: string;
-	banner?: string;
-	color?: string | Object;
+	display_name?: string | null;
+	description?: string | null;
+	icon?: string | null;
+	banner?: string | null;
+	color?: string | null;
 	created: Date | string = '';
 	privacy: GroupPrivacy = {};
 	members?: Map<string, Member> | Array<string>;
