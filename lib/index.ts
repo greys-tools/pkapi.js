@@ -568,7 +568,7 @@ class PKAPI {
 		if(!data.group) throw new Error("Must provide a group ID.");
 
 		try {
-			var resp = await this.handle(ROUTES[this.#_version].GET_GROUP_MEMBERS(data.group));
+			var resp = await this.handle(ROUTES[this.#_version].GET_GROUP_MEMBERS(data.group), { token });
 		} catch(e) {
 			throw e;
 		}
