@@ -740,7 +740,7 @@ class PKAPI {
 		if(!data.switch) throw new Error("Must provide a switch ID.");
 
 		try {
-			var resp = await this.handle(ROUTES[this.#_version].GET_SWITCH(system, data.switch))
+			var resp = await this.handle(ROUTES[this.#_version].GET_SWITCH(system, data.switch), {token})
 		} catch(e) {
 			throw e;
 		}
@@ -840,7 +840,7 @@ class PKAPI {
 		if(!data.switch) throw new Error('Must provide a switch ID.');
 
 		try {
-			await this.handle(ROUTES[this.#_version].DELETE_SWITCH(data.switch));
+			await this.handle(ROUTES[this.#_version].DELETE_SWITCH(data.switch), {token});
 		} catch(e) {
 			throw e;
 		}
