@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 import System, {ISystem} from './structures/system';
-import Member, {IMember} from './structures/member';
+import Member, {IMember, ProxyTag} from './structures/member';
 import Group, {IGroup} from './structures/group';
 import Switch, {ISwitch} from './structures/switch';
 import Message, {IMessage} from './structures/message';
@@ -966,6 +966,7 @@ export {
 
 	Member,
 	IMember,
+	ProxyTag,
 
 	MemberGuildSettings,
 	IMemberGuildSettings,
