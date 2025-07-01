@@ -14,12 +14,17 @@ import APIError from './structures/apiError';
 
 import ROUTES from './routes';
 
+import DefaultRateLimiter from './RateLimiter/DefaultRateLimiter';
+import BaseRateLimiter from './RateLimiter/BaseRateLimiter';
+import NoOpRateLimiter from './RateLimiter/NoOpRateLimiter';
+
 export interface APIData {
 	base_url?: string;
 	version?: number;
 	token?: string;
 	user_agent?: string;
 	debug?: boolean;
+	rate_limiter?: BaseRateLimiter;
 }
 
 export interface RequestOptions {
@@ -52,21 +57,23 @@ class PKAPI {
 	#_version: number = 2;
 	#user_agent: string = 'PKAPI.js/5.x';
 	#debug: boolean = true;
+	#rate_limiter: BaseRateLimiter;
 
 	#version_warning = false;
-	
+
 	constructor(data?: APIData) {
 		this.#_base = (data?.base_url ?? 'https://api.pluralkit.me');
 		this.#_version = (data?.version ?? 2);
 		this.#token = data?.token;
 		this.#user_agent = (data?.user_agent ?? 'PKAPI.js/5.x');
 		this.#debug = (data?.debug !== undefined ? data.debug : true);
+		this.#rate_limiter = data?.rate_limiter ?? new NoOpRateLimiter();
 
 		this.#inst = axios.create({
 			validateStatus: (s) => s < 300 && s > 100,
 			baseURL: `${this.#_base}/v${this.#_version}`,
 			headers: {
-				'User-Agent': this.#user_agent 
+				'User-Agent': this.#user_agent
 			}
 		})
 	}
@@ -74,7 +81,7 @@ class PKAPI {
 	/*
 	**			SYSTEM FUNCTIONS
 	*/
-	
+
 	async getSystem(data: GetSystemOptions = { }) {
 		var token = this.#token ?? data.token;
 		if(data.system == null && !token) throw new Error('Must provide a token or ID.');
@@ -251,7 +258,7 @@ class PKAPI {
 		return new Member(this, resp.data);
 	}
 
-	async getMember(data: { token?: string, member: string  }) {
+	async getMember(data: { token?: string, member: string	}) {
 		if(data.member == null) throw new Error('Must provide a member ID.');
 		var token = this.#token || data.token;
 		try {
@@ -547,7 +554,7 @@ class PKAPI {
 
 	async deleteGroup(data: { token?: string, group: string }) {
 		if(this.version < 2) throw new Error("Groups are only available for API version 2.");
-		
+
 		if(data.group == null) throw new Error("Must provide a group ID.");
 		var token = this.#token || data.token;
 		if(!token) throw new Error("DELETE requires a token.");
@@ -674,7 +681,7 @@ class PKAPI {
 
 		if(data.members) {
 			if(Array.isArray(data.members)) {
-				body.members = data.members;	
+				body.members = data.members;
 			} else {
 				body.members = Object.values(data.members).map((m: IMember) => m.id);
 			}
@@ -888,7 +895,7 @@ class PKAPI {
 
 		if(options?.body) {
 			request.headers["content-type"] = "application/json";
-	        request.data = JSON.stringify(options.body);
+			request.data = JSON.stringify(options.body);
 		}
 
 		if(this.version == 1 && !this.#version_warning) {
@@ -900,17 +907,25 @@ class PKAPI {
 			);
 			this.#version_warning = true;
 		}
-			
-		try {
-			var resp = await this.#inst(route, request);
-		} catch(e: any) {
-			if(this.#debug) console.log(e)
-			throw new APIError(this, e.response);
-		}
 
-		return resp;
+		while (true) {
+			await this.#rate_limiter.wait();
+			try {
+				var resp = await this.#inst(route, request);
+				await this.#rate_limiter.handleResponse(resp);
+			} catch (e: any) {
+				if (await this.#rate_limiter.handleError(e)) {
+					continue;
+				}
+
+				if(this.#debug) console.log(e)
+				throw new APIError(this, e.response);
+			}
+
+			return resp;
+		}
 	}
-	
+
 	set base_url(s) {
 		this.#_base = s;
 		this.#inst.defaults.baseURL = `${this.#_base}/v${this.#_version}`;
@@ -953,12 +968,19 @@ class PKAPI {
 	set debug(b) {
 		this.#debug = b;
 	}
+
+	get rate_limiter() {
+		return this.#rate_limiter;
+	}
+	set rate_limiter(r) {
+		this.#rate_limiter = r;
+	}
 }
 
 export default PKAPI;
 export {
 	PKAPI,
-	
+
 	APIError,
 
 	Group,
@@ -988,4 +1010,8 @@ export {
 
 	SystemGuildSettings,
 	ISystemGuildSettings,
+
+	BaseRateLimiter,
+	NoOpRateLimiter,
+	DefaultRateLimiter,
 }

@@ -10,7 +10,10 @@ export default [
 			assetFileNames: '[name].mjs'
 		},
 		external: ['axios', '@vvo/tzdb', 'tinycolor2', 'valid-url', 'chrono-node'],
-		plugins: [typescript({ tsconfig: './tsconfig.json' })]
+		plugins: [typescript({
+			tsconfig: './tsconfig.json',
+			exclude: ['**/__tests__/**/*']
+		})]
 	},
 	{
 		input: 'lib/index.ts',
@@ -19,6 +22,9 @@ export default [
 			format: 'cjs'
 		},
 		external: ['axios', '@vvo/tzdb', 'tinycolor2', 'valid-url', 'chrono-node'],
-		plugins: [typescript({ tsconfig: './tsconfig-cjs.json' })]
+		plugins: [typescript({
+			tsconfig: './tsconfig-cjs.json',
+			exclude: ['**/__tests__/**/*']
+		})]
 	}
 ]

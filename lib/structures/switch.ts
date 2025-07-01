@@ -34,7 +34,7 @@ export default class Switch implements ISwitch {
 	id: string = '';
 	timestamp: Date | string = '';
 	members?: Map<string, Member> | Array<string>;
-	
+
 	constructor(api: API, data: Partial<Switch>) {
 		this.#api = api;
 		if(!data.timestamp || !data.members)
@@ -73,7 +73,7 @@ export default class Switch implements ISwitch {
 				continue;
 			}
 			if(this[k] == undefined) continue;
-			
+
 			var test = true;
 			if(KEYS[k].test) test = await KEYS[k].test(this[k]);
 			if(!test) {

@@ -229,7 +229,7 @@ export default class Member implements IMember {
 
 	groups?: Map<string, Group>;
 	settings?: Map<string, MemberGuildSettings>;
-	
+
 	constructor(api: API, data: Partial<Member>) {
 		this.#api = api;
 		for(var k in data) {
@@ -292,7 +292,7 @@ export default class Member implements IMember {
 				errors.push(`Key ${k} is required, but wasn't supplied`);
 				continue;
 			}
-			
+
 			if(this[k] == null) {
 				mem[k] = this[k];
 				continue;

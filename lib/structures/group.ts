@@ -128,7 +128,7 @@ export default class Group implements IGroup {
 	created: Date | string = '';
 	privacy: GroupPrivacy = {};
 	members?: Map<string, Member> | Array<string>;
-	
+
 	constructor(api: API, data: Partial<Group>) {
 		this.#api = api;
 		for(var k in data) {
@@ -184,7 +184,7 @@ export default class Group implements IGroup {
 				errors.push(`Key ${k} is required, but wasn't supplied`);
 				continue;
 			}
-			
+
 			if(this[k] == null) {
 				group[k] = this[k];
 				continue;

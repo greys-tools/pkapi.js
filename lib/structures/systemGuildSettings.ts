@@ -47,7 +47,7 @@ export default class SystemGuildSettings implements ISystemGuildSettings {
 	[key: string]: any;
 
 	#api: API;
-	
+
 	guild = '';
 	proxying_enabled?: boolean;
 	tag?: string | null;
@@ -81,7 +81,7 @@ export default class SystemGuildSettings implements ISystemGuildSettings {
 				continue;
 			}
 			if(this[k] == undefined) continue;
-			
+
 			if(KEYS[k].test) test = await KEYS[k].test(this[k]);
 			if(!test) {
 				errors.push(KEYS[k].err);

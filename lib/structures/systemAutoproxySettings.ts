@@ -69,7 +69,7 @@ export default class SystemAutoproxySettings implements ISystemAutoproxySettings
 				continue;
 			}
 			if(this[k] == undefined) continue;
-			
+
 			if(KEYS[k].test) test = await KEYS[k].test(this[k]);
 			if(!test) {
 				errors.push(KEYS[k].err);

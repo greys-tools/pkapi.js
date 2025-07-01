@@ -23,7 +23,7 @@
     "valid-url": "^1.0.9"
   },
   "scripts": {
-    "test": "exit 0",
+    "test": "jest",
     "build": "npx rollup --config",
     "prepublishOnly": "npm run build"
   },
@@ -50,7 +50,9 @@
     "@types/tinycolor2": "^1.4.3",
     "@types/valid-url": "^1.0.3",
     "esbuild": "^0.15.15",
+    "jest": "^30.0.3",
     "rollup": "^3.4.0",
+    "ts-jest": "^29.4.0",
     "tslib": "^2.4.1",
     "typescript": "^4.9.3"
   }

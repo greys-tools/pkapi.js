@@ -9,7 +9,7 @@ export function validatePrivacy(keys: Array<string>, obj: any) {
 
 		priv[k] = obj[k] ? 'public' : 'private';
 	}
-	
+
 	return priv;
 }
 

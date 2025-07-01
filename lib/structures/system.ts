@@ -133,7 +133,7 @@ export default class System implements ISystem {
 	settings?: Map<string, SystemGuildSettings>;
 	config?: SystemConfig;
 	autoproxySettings?: Map<string, SystemAutoproxyConfig>;
-	
+
 	constructor(api: API, data: Partial<System>) {
 		this.#api = api;
 		for(var k in data) {
@@ -254,7 +254,7 @@ export default class System implements ISystem {
 				continue;
 			}
 			if(this[k] == undefined) continue;
-			
+
 			if(KEYS[k].test) test = await KEYS[k].test(this[k]);
 			if(!test) {
 				errors.push(KEYS[k].err);
