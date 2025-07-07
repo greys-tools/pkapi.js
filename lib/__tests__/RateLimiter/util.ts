@@ -1,12 +1,19 @@
 import { AxiosResponse } from 'axios';
 
-export function createRateLimitError(headers = {}) {
+export function createAxiosError(
+	status = 429,
+	responseOptions: Partial<AxiosResponse> = {},
+) {
 	return {
 		isAxiosError: true,
+		code: status,
 		response: createResponse({
-			status: 429,
-			statusText: 'Too Many Requests',
-			headers,
+			status,
+			headers: {},
+			data: '',
+			statusText: '',
+			config: {},
+			...responseOptions,
 		}),
 	};
 }
