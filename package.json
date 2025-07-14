@@ -24,6 +24,7 @@
   },
   "scripts": {
     "test": "npx jest",
+    "check": "npx tsc --noEmit",
     "lint": "npx prettier lib --check",
     "format": "npx prettier lib --write",
     "build": "npx rollup --config",
