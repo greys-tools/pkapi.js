@@ -24,6 +24,8 @@
   },
   "scripts": {
     "test": "jest",
+    "lint": "npx prettier lib --check",
+    "format": "npx prettier lib --write",
     "build": "npx rollup --config",
     "prepublishOnly": "npm run build"
   },
@@ -51,6 +53,7 @@
     "@types/valid-url": "^1.0.3",
     "esbuild": "^0.15.15",
     "jest": "^30.0.3",
+    "prettier": "3.6.2",
     "rollup": "^3.4.0",
     "ts-jest": "^29.4.0",
     "tslib": "^2.4.1",

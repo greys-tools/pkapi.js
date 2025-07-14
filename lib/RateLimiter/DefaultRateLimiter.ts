@@ -56,9 +56,7 @@ export default class DefaultRateLimiter extends BaseRateLimiter {
 	private adjustWaitTime() {
 		const curTime = Date.now();
 		this.errorTimestamps = this.errorTimestamps.filter(
-			(v) =>
-				v >
-				curTime - this.options.errorWindowBase * this.options.minWait,
+			(v) => v > curTime - this.options.errorWindowBase * this.options.minWait,
 		);
 
 		// If we hit the rate limit more than `increaseThreshold` times
@@ -102,8 +100,7 @@ export default class DefaultRateLimiter extends BaseRateLimiter {
 			return null;
 		}
 
-		const parsed: { limit?: number; remaining?: number; reset?: number } =
-			{};
+		const parsed: { limit?: number; remaining?: number; reset?: number } = {};
 
 		if ('x-ratelimit-limit' in headers) {
 			if (typeof headers['x-ratelimit-limit'] == 'string') {
