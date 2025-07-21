@@ -94,41 +94,38 @@ class PKAPI {
 			throw new Error('Must provide a token or ID.');
 		var sys;
 		var resp;
-		try {
-			if (token) {
-				resp = await this.handle(ROUTES[this.#_version].GET_OWN_SYSTEM(), {
-					token,
-				});
-				sys = new System(this, resp.data);
-			} else {
-				if (data.system!.length > 5)
-					resp = await this.handle(
-						ROUTES[this.#_version].GET_ACCOUNT(data.system),
-					);
-				else
-					resp = await this.handle(
-						ROUTES[this.#_version].GET_SYSTEM(data.system!),
-					);
-				sys = new System(this, resp.data);
-			}
 
-			if (data.fetch) {
-				if (data.fetch.includes(SystemFetchOptions.Members))
-					sys.members = await sys.getMembers(token);
-				if (data.fetch.includes(SystemFetchOptions.Fronters))
-					sys.fronters = await sys.getFronters(token);
-				if (data.fetch.includes(SystemFetchOptions.Switches))
-					sys.switches = await sys.getSwitches(token, data.raw);
-				if (data.fetch.includes(SystemFetchOptions.Groups))
-					sys.groups = await sys.getGroups(
-						token,
-						data.fetch.includes(SystemFetchOptions.GroupMembers),
-					);
-				if (data.fetch.includes(SystemFetchOptions.Config))
-					sys.config = await sys.getSettings(token);
-			}
-		} catch (e) {
-			throw e;
+		if (token) {
+			resp = await this.handle(ROUTES[this.#_version].GET_OWN_SYSTEM(), {
+				token,
+			});
+			sys = new System(this, resp.data);
+		} else {
+			if (data.system!.length > 5)
+				resp = await this.handle(
+					ROUTES[this.#_version].GET_ACCOUNT(data.system),
+				);
+			else
+				resp = await this.handle(
+					ROUTES[this.#_version].GET_SYSTEM(data.system!),
+				);
+			sys = new System(this, resp.data);
+		}
+
+		if (data.fetch) {
+			if (data.fetch.includes(SystemFetchOptions.Members))
+				sys.members = await sys.getMembers(token);
+			if (data.fetch.includes(SystemFetchOptions.Fronters))
+				sys.fronters = await sys.getFronters(token);
+			if (data.fetch.includes(SystemFetchOptions.Switches))
+				sys.switches = await sys.getSwitches(token, data.raw);
+			if (data.fetch.includes(SystemFetchOptions.Groups))
+				sys.groups = await sys.getGroups(
+					token,
+					data.fetch.includes(SystemFetchOptions.GroupMembers),
+				);
+			if (data.fetch.includes(SystemFetchOptions.Config))
+				sys.config = await sys.getSettings(token);
 		}
 
 		return sys;
@@ -142,16 +139,12 @@ class PKAPI {
 		var token = this.#token ?? data.token;
 		if (!token) throw new Error('PATCH requires a token.');
 
-		try {
-			var sys = data instanceof System ? data : new System(this, data);
-			var body = await sys.verify();
-			var resp = await this.handle(ROUTES[this.#_version].PATCH_SYSTEM(), {
-				token,
-				body,
-			});
-		} catch (e) {
-			throw e;
-		}
+		var sys = data instanceof System ? data : new System(this, data);
+		var body = await sys.verify();
+		var resp = await this.handle(ROUTES[this.#_version].PATCH_SYSTEM(), {
+			token,
+			body,
+		});
 
 		return new System(this, resp.data);
 	}
@@ -163,13 +156,9 @@ class PKAPI {
 		var token = this.#token || data.token;
 		if (!token) throw new Error('Getting system settings requires a token.');
 
-		try {
-			var resp = await this.handle(ROUTES[this.#_version].GET_SYSTEM_CONFIG(), {
-				token,
-			});
-		} catch (e) {
-			throw e;
-		}
+		var resp = await this.handle(ROUTES[this.#_version].GET_SYSTEM_CONFIG(), {
+			token,
+		});
 
 		return new SystemConfig(this, resp.data);
 	}
@@ -181,17 +170,13 @@ class PKAPI {
 		var token = this.#token || data.token;
 		if (!token) throw new Error('PATCH requires a token.');
 
-		try {
-			var settings =
-				data instanceof SystemConfig ? data : new SystemConfig(this, data);
-			var body = await settings.verify();
-			var resp = await this.handle(
-				ROUTES[this.#_version].PATCH_SYSTEM_CONFIG(),
-				{ token, body },
-			);
-		} catch (e) {
-			throw e;
-		}
+		var settings =
+			data instanceof SystemConfig ? data : new SystemConfig(this, data);
+		var body = await settings.verify();
+		var resp = await this.handle(ROUTES[this.#_version].PATCH_SYSTEM_CONFIG(), {
+			token,
+			body,
+		});
 
 		return new SystemConfig(this, resp.data);
 	}
@@ -204,16 +189,10 @@ class PKAPI {
 		if (!token) throw new Error('Getting guild settings requires a token.');
 		if (!data.guild) throw new Error('Must provide a guild ID.');
 
-		try {
-			var resp = await this.handle(
-				ROUTES[this.#_version].GET_SYSTEM_GUILD_SETTINGS(data.guild),
-				{
-					token,
-				},
-			);
-		} catch (e) {
-			throw e;
-		}
+		var resp = await this.handle(
+			ROUTES[this.#_version].GET_SYSTEM_GUILD_SETTINGS(data.guild),
+			{ token },
+		);
 
 		return new SystemGuildSettings(this, { ...resp.data, guild: data.guild });
 	}
@@ -226,22 +205,15 @@ class PKAPI {
 		if (!token) throw new Error('PATCH requires a token.');
 		if (!data.guild) throw new Error('Must provide a guild ID.');
 
-		try {
-			var settings =
-				data instanceof SystemGuildSettings
-					? data
-					: new SystemGuildSettings(this, data);
-			var body = await settings.verify();
-			var resp = await this.handle(
-				ROUTES[this.#_version].PATCH_SYSTEM_GUILD_SETTINGS(data.guild),
-				{
-					token,
-					body,
-				},
-			);
-		} catch (e) {
-			throw e;
-		}
+		var settings =
+			data instanceof SystemGuildSettings
+				? data
+				: new SystemGuildSettings(this, data);
+		var body = await settings.verify();
+		var resp = await this.handle(
+			ROUTES[this.#_version].PATCH_SYSTEM_GUILD_SETTINGS(data.guild),
+			{ token, body },
+		);
 
 		return new SystemGuildSettings(this, { ...resp.data, guild: data.guild });
 	}
@@ -256,14 +228,10 @@ class PKAPI {
 		if (!token) throw new Error('Getting autoproxy settings requires a token.');
 		if (!data.guild) throw new Error('Must provide a guild ID.');
 
-		try {
-			var resp = await this.handle(
-				ROUTES[this.#_version].GET_SYSTEM_AUTOPROXY_SETTINGS(data.guild),
-				{ token },
-			);
-		} catch (e) {
-			throw e;
-		}
+		var resp = await this.handle(
+			ROUTES[this.#_version].GET_SYSTEM_AUTOPROXY_SETTINGS(data.guild),
+			{ token },
+		);
 
 		return new SystemAutoproxySettings(this, {
 			...resp.data,
@@ -283,19 +251,15 @@ class PKAPI {
 		if (!token) throw new Error('PATCH requires a token.');
 		if (!data.guild) throw new Error('Must provide a guild ID.');
 
-		try {
-			var settings =
-				data instanceof SystemAutoproxySettings
-					? data
-					: new SystemAutoproxySettings(this, data);
-			var body = await settings.verify();
-			var resp = await this.handle(
-				ROUTES[this.#_version].PATCH_SYSTEM_AUTOPROXY_SETTINGS(data.guild),
-				{ token, body },
-			);
-		} catch (e) {
-			throw e;
-		}
+		var settings =
+			data instanceof SystemAutoproxySettings
+				? data
+				: new SystemAutoproxySettings(this, data);
+		var body = await settings.verify();
+		var resp = await this.handle(
+			ROUTES[this.#_version].PATCH_SYSTEM_AUTOPROXY_SETTINGS(data.guild),
+			{ token, body },
+		);
 
 		return new SystemAutoproxySettings(this, {
 			...resp.data,
@@ -311,16 +275,12 @@ class PKAPI {
 		var token = this.#token || data.token;
 		if (!token) throw new Error('POST requires a token.');
 
-		try {
-			var mem = new Member(this, data);
-			var body = await mem.verify();
-			var resp = await this.handle(ROUTES[this.#_version].ADD_MEMBER(), {
-				token,
-				body,
-			});
-		} catch (e) {
-			throw e;
-		}
+		var mem = new Member(this, data);
+		var body = await mem.verify();
+		var resp = await this.handle(ROUTES[this.#_version].ADD_MEMBER(), {
+			token,
+			body,
+		});
 
 		return new Member(this, resp.data);
 	}
@@ -343,13 +303,10 @@ class PKAPI {
 	async getMembers(data: { token?: string; system: string }) {
 		var token = this.#token || data.token;
 		var system = data.system ?? '@me';
-		try {
-			var resp = await this.handle(ROUTES[this.#_version].GET_MEMBERS(system), {
-				token,
-			});
-		} catch (e) {
-			throw e;
-		}
+
+		var resp = await this.handle(ROUTES[this.#_version].GET_MEMBERS(system), {
+			token,
+		});
 
 		var mems = resp.data.map((m: IMember) => [m.id, new Member(this, m)]);
 		return new Map<string, Member>(mems);
@@ -360,19 +317,12 @@ class PKAPI {
 		var token = this.#token || data.token;
 		if (!token) throw new Error('PATCH requires a token.');
 
-		try {
-			var mem = data instanceof Member ? data : new Member(this, data);
-			var body = await mem.verify();
-			var resp = await this.handle(
-				ROUTES[this.#_version].PATCH_MEMBER(data.member),
-				{
-					token,
-					body,
-				},
-			);
-		} catch (e) {
-			throw e;
-		}
+		var mem = data instanceof Member ? data : new Member(this, data);
+		var body = await mem.verify();
+		var resp = await this.handle(
+			ROUTES[this.#_version].PATCH_MEMBER(data.member),
+			{ token, body },
+		);
 
 		return new Member(this, resp.data);
 	}
@@ -381,14 +331,11 @@ class PKAPI {
 		if (data.member == null) throw new Error('Must provide a member ID.');
 		var token = this.#token || data.token;
 		if (!token) throw new Error('DELETE requires a token.');
-		try {
-			var resp = await this.handle(
-				ROUTES[this.#_version].DELETE_MEMBER(data.member),
-				{ token },
-			);
-		} catch (e) {
-			throw e;
-		}
+
+		var resp = await this.handle(
+			ROUTES[this.#_version].DELETE_MEMBER(data.member),
+			{ token },
+		);
 
 		return null;
 	}
@@ -400,16 +347,10 @@ class PKAPI {
 		var token = this.#token || data.token;
 		if (!data.member) throw new Error('Must provide a member ID.');
 
-		try {
-			var resp = await this.handle(
-				ROUTES[this.#_version].GET_MEMBER_GROUPS(data.member),
-				{
-					token,
-				},
-			);
-		} catch (e) {
-			throw e;
-		}
+		var resp = await this.handle(
+			ROUTES[this.#_version].GET_MEMBER_GROUPS(data.member),
+			{ token },
+		);
 
 		var groups = resp.data.map((g: IGroup) => [g.id, new Group(this, g)]);
 		return new Map<string, Group>(groups);
@@ -431,17 +372,10 @@ class PKAPI {
 		var groups = data.groups;
 		groups = groups.map((g) => (g instanceof Group ? g.id : g));
 
-		try {
-			var resp = await this.handle(
-				ROUTES[this.#_version].ADD_MEMBER_GROUPS(data.member),
-				{
-					token,
-					body: groups,
-				},
-			);
-		} catch (e) {
-			throw e;
-		}
+		var resp = await this.handle(
+			ROUTES[this.#_version].ADD_MEMBER_GROUPS(data.member),
+			{ token, body: groups },
+		);
 
 		return;
 	}
@@ -462,17 +396,10 @@ class PKAPI {
 		var groups = data.groups;
 		groups = groups.map((g) => (g instanceof Group ? g.id : g));
 
-		try {
-			var resp = await this.handle(
-				ROUTES[this.#_version].REMOVE_MEMBER_GROUPS(data.member),
-				{
-					token,
-					body: groups,
-				},
-			);
-		} catch (e) {
-			throw e;
-		}
+		var resp = await this.handle(
+			ROUTES[this.#_version].REMOVE_MEMBER_GROUPS(data.member),
+			{ token, body: groups },
+		);
 
 		return;
 	}
@@ -493,17 +420,10 @@ class PKAPI {
 		var groups = data.groups;
 		groups = groups.map((g) => (g instanceof Group ? g.id : g));
 
-		try {
-			var resp = await this.handle(
-				ROUTES[this.#_version].SET_MEMBER_GROUPS(data.member),
-				{
-					token,
-					body: groups,
-				},
-			);
-		} catch (e) {
-			throw e;
-		}
+		var resp = await this.handle(
+			ROUTES[this.#_version].SET_MEMBER_GROUPS(data.member),
+			{ token, body: groups },
+		);
 
 		return;
 	}
@@ -521,19 +441,10 @@ class PKAPI {
 		if (!data.member) throw new Error('Must provide a member ID.');
 		if (!data.guild) throw new Error('Must provide a guild ID.');
 
-		try {
-			var resp = await this.handle(
-				ROUTES[this.#_version].GET_MEMBER_GUILD_SETTINGS(
-					data.member,
-					data.guild,
-				),
-				{
-					token,
-				},
-			);
-		} catch (e) {
-			throw e;
-		}
+		var resp = await this.handle(
+			ROUTES[this.#_version].GET_MEMBER_GUILD_SETTINGS(data.member, data.guild),
+			{ token },
+		);
 
 		return new MemberGuildSettings(this, {
 			...resp.data,
@@ -553,25 +464,18 @@ class PKAPI {
 		if (!data.member) throw new Error('Must provide a member ID.');
 		if (!data.guild) throw new Error('Must provide a guild ID.');
 
-		try {
-			var settings =
-				data instanceof MemberGuildSettings
-					? data
-					: new MemberGuildSettings(this, data);
-			var body = await settings.verify();
-			var resp = await this.handle(
-				ROUTES[this.#_version].PATCH_MEMBER_GUILD_SETTINGS(
-					data.member,
-					data.guild,
-				),
-				{
-					token,
-					body,
-				},
-			);
-		} catch (e) {
-			throw e;
-		}
+		var settings =
+			data instanceof MemberGuildSettings
+				? data
+				: new MemberGuildSettings(this, data);
+		var body = await settings.verify();
+		var resp = await this.handle(
+			ROUTES[this.#_version].PATCH_MEMBER_GUILD_SETTINGS(
+				data.member,
+				data.guild,
+			),
+			{ token, body },
+		);
 
 		return new MemberGuildSettings(this, {
 			...resp.data,
@@ -591,16 +495,12 @@ class PKAPI {
 		var token = this.#token || data.token;
 		if (!token) throw new Error('POST requires a token.');
 
-		try {
-			var group = new Group(this, data);
-			var body = await group.verify();
-			var resp = await this.handle(ROUTES[this.#_version].ADD_GROUP(), {
-				token,
-				body,
-			});
-		} catch (e) {
-			throw e;
-		}
+		var group = new Group(this, data);
+		var body = await group.verify();
+		var resp = await this.handle(ROUTES[this.#_version].ADD_GROUP(), {
+			token,
+			body,
+		});
 
 		return new Group(this, resp.data);
 	}
@@ -619,34 +519,28 @@ class PKAPI {
 		var with_members = data.with_members ?? false;
 
 		var groups;
-		try {
-			var resp = await this.handle(
-				ROUTES[this.#_version].GET_GROUPS(system, with_members),
-				{
-					token,
-				},
+		var resp = await this.handle(
+			ROUTES[this.#_version].GET_GROUPS(system, with_members),
+			{ token },
+		);
+		if (with_members && !data.raw) {
+			var memb_resp = await this.handle(
+				ROUTES[this.#_version].GET_MEMBERS(system),
+				{ token },
 			);
-			if (with_members && !data.raw) {
-				var memb_resp = await this.handle(
-					ROUTES[this.#_version].GET_MEMBERS(system),
-					{ token },
-				);
-				var membs: Map<string, Member> = new Map(
-					memb_resp.data.map((m: IMember) => [m.uuid, new Member(this, m)]),
-				);
-				groups = [];
-				for (var g of resp.data) {
-					var members = new Map();
-					for (var m of g.members) {
-						var grabbed: Member | undefined = membs.get(m);
-						if (grabbed) members.set(grabbed.id, grabbed);
-					}
-					g.members = members;
-					groups.push(new Group(this, g));
+			var membs: Map<string, Member> = new Map(
+				memb_resp.data.map((m: IMember) => [m.uuid, new Member(this, m)]),
+			);
+			groups = [];
+			for (var g of resp.data) {
+				var members = new Map();
+				for (var m of g.members) {
+					var grabbed: Member | undefined = membs.get(m);
+					if (grabbed) members.set(grabbed.id, grabbed);
 				}
+				g.members = members;
+				groups.push(new Group(this, g));
 			}
-		} catch (e) {
-			throw e;
 		}
 
 		if (!with_members || data.raw)
@@ -666,17 +560,12 @@ class PKAPI {
 		var token = this.#token || data.token;
 		if (!data.group) throw new Error('Must provide group ID.');
 
-		try {
-			var resp = await this.handle(
-				ROUTES[this.#_version].GET_GROUP(data.group),
-				{ token },
-			);
-			var group = new Group(this, resp.data);
+		var resp = await this.handle(ROUTES[this.#_version].GET_GROUP(data.group), {
+			token,
+		});
+		var group = new Group(this, resp.data);
 
-			if (data.fetch_members) group.members = await group.getMembers();
-		} catch (e) {
-			throw e;
-		}
+		if (data.fetch_members) group.members = await group.getMembers();
 
 		return group;
 	}
@@ -689,16 +578,12 @@ class PKAPI {
 		var token = this.#token || data.token;
 		if (!token) throw new Error('PATCH requires a token.');
 
-		try {
-			var group = data instanceof Group ? data : new Group(this, data);
-			var body = await group.verify();
-			var resp = await this.handle(
-				ROUTES[this.#_version].PATCH_GROUP(data.group),
-				{ token, body },
-			);
-		} catch (e) {
-			throw e;
-		}
+		var group = data instanceof Group ? data : new Group(this, data);
+		var body = await group.verify();
+		var resp = await this.handle(
+			ROUTES[this.#_version].PATCH_GROUP(data.group),
+			{ token, body },
+		);
 
 		return new Group(this, resp.data);
 	}
@@ -711,13 +596,9 @@ class PKAPI {
 		var token = this.#token || data.token;
 		if (!token) throw new Error('DELETE requires a token.');
 
-		try {
-			await this.handle(ROUTES[this.#_version].DELETE_GROUP(data.group), {
-				token,
-			});
-		} catch (e) {
-			throw e;
-		}
+		await this.handle(ROUTES[this.#_version].DELETE_GROUP(data.group), {
+			token,
+		});
 
 		return;
 	}
@@ -729,14 +610,10 @@ class PKAPI {
 		var token = this.#token || data.token;
 		if (!data.group) throw new Error('Must provide a group ID.');
 
-		try {
-			var resp = await this.handle(
-				ROUTES[this.#_version].GET_GROUP_MEMBERS(data.group),
-				{ token },
-			);
-		} catch (e) {
-			throw e;
-		}
+		var resp = await this.handle(
+			ROUTES[this.#_version].GET_GROUP_MEMBERS(data.group),
+			{ token },
+		);
 
 		var mems = resp.data.map((m: IMember) => [m.id, new Member(this, m)]);
 		return new Map<string, Member>(mems);
@@ -758,17 +635,10 @@ class PKAPI {
 		var members = data.members;
 		members = members.map((m) => (m instanceof Member ? m.id : m));
 
-		try {
-			var resp = await this.handle(
-				ROUTES[this.#_version].ADD_GROUP_MEMBERS(data.group),
-				{
-					token,
-					body: members,
-				},
-			);
-		} catch (e) {
-			throw e;
-		}
+		var resp = await this.handle(
+			ROUTES[this.#_version].ADD_GROUP_MEMBERS(data.group),
+			{ token, body: members },
+		);
 
 		return;
 	}
@@ -789,17 +659,10 @@ class PKAPI {
 		var members = data.members;
 		members = members.map((m) => (m instanceof Member ? m.id : m));
 
-		try {
-			var resp = await this.handle(
-				ROUTES[this.#_version].REMOVE_GROUP_MEMBERS(data.group),
-				{
-					token,
-					body: members,
-				},
-			);
-		} catch (e) {
-			throw e;
-		}
+		var resp = await this.handle(
+			ROUTES[this.#_version].REMOVE_GROUP_MEMBERS(data.group),
+			{ token, body: members },
+		);
 
 		return;
 	}
@@ -820,17 +683,10 @@ class PKAPI {
 		var members = data.members;
 		members = members.map((m) => (m instanceof Member ? m.id : m));
 
-		try {
-			var resp = await this.handle(
-				ROUTES[this.#_version].SET_GROUP_MEMBERS(data.group),
-				{
-					token,
-					body: members,
-				},
-			);
-		} catch (e) {
-			throw e;
-		}
+		var resp = await this.handle(
+			ROUTES[this.#_version].SET_GROUP_MEMBERS(data.group),
+			{ token, body: members },
+		);
 
 		return;
 	}
@@ -856,14 +712,10 @@ class PKAPI {
 				body.members = Object.values(data.members).map((m: IMember) => m.id);
 			}
 		}
-		try {
-			var resp = await this.handle(ROUTES[this.#_version].ADD_SWITCH(), {
-				token,
-				body,
-			});
-		} catch (e) {
-			throw e;
-		}
+		var resp = await this.handle(ROUTES[this.#_version].ADD_SWITCH(), {
+			token,
+			body,
+		});
 
 		if (this.#_version < 2) return;
 
@@ -885,32 +737,25 @@ class PKAPI {
 		var system = data.system ?? '@me';
 		var token = this.#token || data.token;
 		var { before, limit } = data;
-		try {
-			var resp = await this.handle(
-				ROUTES[this.#_version].GET_SWITCHES(system, before, limit),
-				{
-					token,
-				},
+		var resp = await this.handle(
+			ROUTES[this.#_version].GET_SWITCHES(system, before, limit),
+			{ token },
+		);
+		if (!data.raw) {
+			var memb_resp = await this.handle(
+				ROUTES[this.#_version].GET_MEMBERS(system),
+				{ token },
 			);
-			if (!data.raw) {
-				var memb_resp = await this.handle(
-					ROUTES[this.#_version].GET_MEMBERS(system),
-					{ token },
-				);
-				var membs = new Map(
-					memb_resp.data.map((m: IMember) => [m.id, new Member(this, m)]),
-				);
-				var switches = [];
-				for (var s of resp.data) {
-					var members = new Map();
-					for (var m of s.members)
-						if (membs.get(m)) members.set(m, membs.get(m));
-					s.members = members;
-					switches.push(new Switch(this, s));
-				}
+			var membs = new Map(
+				memb_resp.data.map((m: IMember) => [m.id, new Member(this, m)]),
+			);
+			var switches = [];
+			for (var s of resp.data) {
+				var members = new Map();
+				for (var m of s.members) if (membs.get(m)) members.set(m, membs.get(m));
+				s.members = members;
+				switches.push(new Switch(this, s));
 			}
-		} catch (e) {
-			throw e;
 		}
 
 		if (data.raw) {
@@ -931,16 +776,10 @@ class PKAPI {
 		var system = data.system ?? '@me';
 		if (!data.switch) throw new Error('Must provide a switch ID.');
 
-		try {
-			var resp = await this.handle(
-				ROUTES[this.#_version].GET_SWITCH(system, data.switch),
-				{
-					token,
-				},
-			);
-		} catch (e) {
-			throw e;
-		}
+		var resp = await this.handle(
+			ROUTES[this.#_version].GET_SWITCH(system, data.switch),
+			{ token },
+		);
 
 		return new Switch(this, {
 			...resp.data,
@@ -987,17 +826,13 @@ class PKAPI {
 		if (!data.switch) throw new Error('Must provide a switch ID.');
 		if (!data.timestamp) throw new Error('Must provide a timestamp.');
 
-		try {
-			var sw = await this.handle(
-				ROUTES[this.#_version].PATCH_SWITCH(data.switch),
-				{
-					token,
-					body: { timestamp: data.timestamp },
-				},
-			);
-		} catch (e) {
-			throw e;
-		}
+		var sw = await this.handle(
+			ROUTES[this.#_version].PATCH_SWITCH(data.switch),
+			{
+				token,
+				body: { timestamp: data.timestamp },
+			},
+		);
 
 		return new Switch(this, {
 			...sw.data,
@@ -1021,22 +856,18 @@ class PKAPI {
 		if (!token) throw new Error('PATCH requires a token.');
 		if (!data.switch) throw new Error('Must provide a switch ID.');
 
-		try {
-			var s = data instanceof Switch ? data : new Switch(this, data);
-			var sv = await s.verify();
-			if (sv.members && !Array.isArray(sv.members))
-				throw new Error('Members must be an array or map if provided.');
+		var s = data instanceof Switch ? data : new Switch(this, data);
+		var sv = await s.verify();
+		if (sv.members && !Array.isArray(sv.members))
+			throw new Error('Members must be an array or map if provided.');
 
-			var sw = await this.handle(
-				ROUTES[this.#_version].PATCH_SWITCH_MEMBERS(data.switch),
-				{
-					token,
-					body: sv.members ?? [],
-				},
-			);
-		} catch (e) {
-			throw e;
-		}
+		var sw = await this.handle(
+			ROUTES[this.#_version].PATCH_SWITCH_MEMBERS(data.switch),
+			{
+				token,
+				body: sv.members ?? [],
+			},
+		);
 
 		return new Switch(this, {
 			...sw.data,
@@ -1056,13 +887,9 @@ class PKAPI {
 		if (!token) throw new Error('DELETE requires a token.');
 		if (!data.switch) throw new Error('Must provide a switch ID.');
 
-		try {
-			await this.handle(ROUTES[this.#_version].DELETE_SWITCH(data.switch), {
-				token,
-			});
-		} catch (e) {
-			throw e;
-		}
+		await this.handle(ROUTES[this.#_version].DELETE_SWITCH(data.switch), {
+			token,
+		});
 
 		return;
 	}
@@ -1074,14 +901,10 @@ class PKAPI {
 	async getMessage(data: { token?: string; message: string }) {
 		if (data.message == null) throw new Error('Must provide a message ID.');
 		var token = this.#token || data.token;
-		try {
-			var resp = await this.handle(
-				ROUTES[this.#_version].GET_MESSAGE(data.message),
-				{ token },
-			);
-		} catch (e) {
-			throw e;
-		}
+		var resp = await this.handle(
+			ROUTES[this.#_version].GET_MESSAGE(data.message),
+			{ token },
+		);
 
 		return new Message(this, resp.data);
 	}
