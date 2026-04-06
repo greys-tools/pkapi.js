@@ -14,9 +14,9 @@ export function validatePrivacy(keys: Array<string>, obj: any) {
 }
 
 export function formatDate(D: Date) {
-	var y = ('000' + D.getFullYear()).slice(-4);
-	var m = ('0' + (D.getMonth() + 1)).slice(-2);
-	var d = ('0' + D.getDate()).slice(-2);
+	var y = ('000' + D.getUTCFullYear()).slice(-4);
+	var m = ('0' + (D.getUTCMonth() + 1)).slice(-2);
+	var d = ('0' + D.getUTCDate()).slice(-2);
 
 	return `${y}-${m}-${d}`;
 }
