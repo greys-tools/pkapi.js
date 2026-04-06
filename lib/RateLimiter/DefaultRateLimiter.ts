@@ -174,14 +174,13 @@ export default class DefaultRateLimiter extends BaseRateLimiter {
 	}
 
 	public async handleError(error: unknown): Promise<boolean> {
-		if (
-			axios.isAxiosError(error) &&
-			error.response &&
-			this.isRateLimitError(error.response)
-		) {
-			this.errorTimestamps.push(Date.now());
+		if (axios.isAxiosError(error) && error.response) {
+			if (this.isRateLimitError(error.response)) {
+				this.errorTimestamps.push(Date.now());
+			}
+
 			this.handleResult(error.response);
-			return true;
+			return this.isRateLimitError(error.response);
 		}
 
 		return false;

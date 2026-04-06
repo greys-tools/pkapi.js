@@ -2,11 +2,11 @@ import { jest, describe, expect, it } from '@jest/globals';
 
 import NoOpRateLimiter from '../../RateLimiter/NoOpRateLimiter';
 
-import { createResponse, createRateLimitError } from './util';
+import { createResponse, createAxiosError } from './util';
 
 describe('NoOpRateLimiter', function () {
 	describe('handleError', function () {
-		it.each([createRateLimitError(), 'random-value'])(
+		it.each([createAxiosError(), 'random-value'])(
 			'returns false with handleError(%j)',
 			async function (err) {
 				const limiter = new NoOpRateLimiter();
