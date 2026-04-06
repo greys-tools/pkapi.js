@@ -17,8 +17,7 @@ expect.extend({
 		if (resolvedAt === null) {
 			return {
 				pass: false,
-				message: () =>
-					`expected ${received} to resolve, but it never did`,
+				message: () => `expected ${received} to resolve, but it never did`,
 			};
 		}
 

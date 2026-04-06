@@ -13,6 +13,26 @@ jobs:
       - run: npm ci
       - run: npm run build
 
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run lint
+
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run check
+
   test:
     runs-on: ubuntu-latest
     steps:

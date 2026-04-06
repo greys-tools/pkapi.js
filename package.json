@@ -23,7 +23,10 @@
     "valid-url": "^1.0.9"
   },
   "scripts": {
-    "test": "jest",
+    "test": "npx jest",
+    "check": "npx tsc --noEmit",
+    "lint": "npx prettier lib --check",
+    "format": "npx prettier lib --write",
     "build": "npx rollup --config",
     "prepublishOnly": "npm run build"
   },
@@ -46,14 +49,15 @@
   "description": "A JS wrapper for the PluralKit Discord bot's API.",
   "devDependencies": {
     "@rollup/plugin-typescript": "^9.0.2",
-    "@types/node": "^18.11.9",
+    "@types/node": "^20.19.7",
     "@types/tinycolor2": "^1.4.3",
     "@types/valid-url": "^1.0.3",
     "esbuild": "^0.15.15",
     "jest": "^30.0.3",
+    "prettier": "3.6.2",
     "rollup": "^3.4.0",
     "ts-jest": "^29.4.0",
     "tslib": "^2.4.1",
-    "typescript": "^4.9.3"
+    "typescript": "^5.8.3"
   }
 }

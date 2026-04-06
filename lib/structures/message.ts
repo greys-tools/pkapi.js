@@ -1,24 +1,24 @@
 import API from '../index';
 
-import Member from "./member";
-import System from "./system";
+import Member from './member';
+import System from './system';
 
 const KEYS: any = {
 	timestamp: {
-		init: (t: Date | string) => new Date(t)
+		init: (t: Date | string) => new Date(t),
 	},
-	id: { },
-	original: { },
-	sender: { },
-	channel: { },
-	guild: { },
+	id: {},
+	original: {},
+	sender: {},
+	channel: {},
+	guild: {},
 	system: {
-		init: (s: Partial<System>, api: API) => s ? new System(api, s) : null
+		init: (s: Partial<System>, api: API) => (s ? new System(api, s) : null),
 	},
 	member: {
-		init: (m: Partial<Member>, api: API) => m ? new Member(api, m) : null
-	}
-}
+		init: (m: Partial<Member>, api: API) => (m ? new Member(api, m) : null),
+	},
+};
 
 export interface IMessage {
 	timestamp: Date | string;
@@ -47,9 +47,9 @@ export default class Message implements IMessage {
 
 	constructor(api: API, data: Partial<Message>) {
 		this.#api = api;
-		for(var k in data) {
-			if(KEYS[k]) {
-				if(KEYS[k].init) data[k] = KEYS[k].init(data[k]);
+		for (var k in data) {
+			if (KEYS[k]) {
+				if (KEYS[k].init) data[k] = KEYS[k].init(data[k]);
 				this[k] = data[k];
 			}
 		}
