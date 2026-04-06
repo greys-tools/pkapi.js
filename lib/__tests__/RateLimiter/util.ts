@@ -12,7 +12,7 @@ export function createAxiosError(
 			headers: {},
 			data: '',
 			config: {
-				headers: new AxiosHeaders(),
+				headers: new AxiosHeaders()
 			},
 			statusText: '',
 			...responseOptions,
@@ -29,7 +29,7 @@ export function createResponse(
 		statusText: 'OK',
 		data: '',
 		config: {
-			headers: new AxiosHeaders(),
+			headers: new AxiosHeaders()
 		},
 		...options,
 	};
