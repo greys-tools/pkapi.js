@@ -1,4 +1,4 @@
-import { AxiosResponse } from 'axios';
+import { AxiosResponse, AxiosHeaders } from 'axios';
 
 export function createAxiosError(
 	status = 429,
@@ -11,8 +11,10 @@ export function createAxiosError(
 			status,
 			headers: {},
 			data: '',
+			config: {
+				headers: new AxiosHeaders()
+			},
 			statusText: '',
-			config: {},
 			...responseOptions,
 		}),
 	};
@@ -26,7 +28,9 @@ export function createResponse(
 		headers: {},
 		statusText: 'OK',
 		data: '',
-		config: {},
+		config: {
+			headers: new AxiosHeaders()
+		},
 		...options,
 	};
 }
