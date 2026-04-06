@@ -11,10 +11,13 @@ export default [
 			assetFileNames: '[name].mjs'
 		},
 		external: ['axios', '@vvo/tzdb', 'tinycolor2', 'valid-url', 'chrono-node'],
-		plugins: [typescript({
-			tsconfig: './tsconfig.json',
-			exclude: ['**/__tests__/**/*']
-		})]
+		plugins: [
+			typescript({
+				tsconfig: './tsconfig.json',
+				exclude: ['**/__tests__/**/*']
+			}),
+			json(),
+		]
 	},
 	{
 		input: 'lib/index.ts',
@@ -28,7 +31,7 @@ export default [
 				tsconfig: './tsconfig-cjs.json',
 				exclude: ['**/__tests__/**/*']
 			}),
-			json({compact: true})
+			json(),
 		]
 	}
 ]

@@ -25,9 +25,7 @@ import DefaultRateLimiter from './RateLimiter/DefaultRateLimiter';
 import BaseRateLimiter from './RateLimiter/BaseRateLimiter';
 import NoOpRateLimiter from './RateLimiter/NoOpRateLimiter';
 
-const pkg = JSON.parse(
-	readFileSync(new URL('./package.json', import.meta.url), 'utf8'),
-);
+import { version } from '../package.json';
 
 export interface APIData {
 	base_url?: string;
@@ -66,7 +64,7 @@ class PKAPI {
 	#inst;
 	#_base: string = 'https://api.pluralkit.me';
 	#_version: number = 2;
-	#user_agent: string = `PKAPI.js/${pkg.version}`;
+	#user_agent: string = `PKAPI.js/${version}`;
 	#debug: boolean = true;
 	#rate_limiter: BaseRateLimiter;
 
@@ -76,7 +74,7 @@ class PKAPI {
 		this.#_base = data?.base_url ?? 'https://api.pluralkit.me';
 		this.#_version = data?.version ?? 2;
 		this.#token = data?.token;
-		this.#user_agent = data?.user_agent ?? `PKAPI.js/${pkg.version}`;
+		this.#user_agent = data?.user_agent ?? `PKAPI.js/${version}`;
 		this.#debug = data?.debug !== undefined ? data.debug : true;
 		this.#rate_limiter = data?.rate_limiter ?? new NoOpRateLimiter();
 
