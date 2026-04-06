@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { readFileSync } from 'fs';
 
 import System, { ISystem } from './structures/system';
 import Member, { IMember, ProxyTag } from './structures/member';
@@ -24,7 +25,7 @@ import DefaultRateLimiter from './RateLimiter/DefaultRateLimiter';
 import BaseRateLimiter from './RateLimiter/BaseRateLimiter';
 import NoOpRateLimiter from './RateLimiter/NoOpRateLimiter';
 
-import pkg from '../package.json';
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 
 export interface APIData {
 	base_url?: string;

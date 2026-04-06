@@ -48,6 +48,7 @@
   "homepage": "https://github.com/greys-tools/pkapi.js#readme",
   "description": "A JS wrapper for the PluralKit Discord bot's API.",
   "devDependencies": {
+    "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-typescript": "^9.0.2",
     "@types/node": "^20.19.7",
     "@types/tinycolor2": "^1.4.3",

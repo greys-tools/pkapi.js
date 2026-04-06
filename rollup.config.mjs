@@ -1,4 +1,5 @@
 import typescript from '@rollup/plugin-typescript';
+import json from '@rollup/plugin-json';
 
 export default [
 	{
@@ -22,9 +23,12 @@ export default [
 			format: 'cjs'
 		},
 		external: ['axios', '@vvo/tzdb', 'tinycolor2', 'valid-url', 'chrono-node'],
-		plugins: [typescript({
-			tsconfig: './tsconfig-cjs.json',
-			exclude: ['**/__tests__/**/*']
-		})]
+		plugins: [
+			typescript({
+				tsconfig: './tsconfig-cjs.json',
+				exclude: ['**/__tests__/**/*']
+			}),
+			json({compact: true})
+		]
 	}
 ]
