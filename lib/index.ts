@@ -76,7 +76,7 @@ class PKAPI {
 		this.#rate_limiter = data?.rate_limiter ?? new NoOpRateLimiter();
 
 		this.#inst = axios.create({
-			validateStatus: (s) => s < 300 && s > 100,
+			validateStatus: (s: number) => s < 300 && s > 100,
 			baseURL: `${this.#_base}/v${this.#_version}`,
 			headers: {
 				'User-Agent': this.#user_agent,
@@ -125,7 +125,7 @@ class PKAPI {
 					data.fetch.includes(SystemFetchOptions.GroupMembers),
 				);
 			if (data.fetch.includes(SystemFetchOptions.Config))
-				sys.config = await sys.getSettings(token);
+				sys.config = await sys.getConfig(token);
 		}
 
 		return sys;
